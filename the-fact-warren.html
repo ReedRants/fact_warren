@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fact Warren — Oakstone Guard</title>
+<style>
+:root{
+  --moss-dark:#2f4030;
+  --moss:#3e5a3f;
+  --moss-light:#6b8c5f;
+  --oak-brown:#5a3d2b;
+  --oak-dark:#3b271b;
+  --parchment:#f3e6c8;
+  --parchment-dark:#e6d3a3;
+  --lantern-gold:#e8b84b;
+  --lantern-bright:#ffd67a;
+  --ink:#2b2118;
+  --ink-soft:#5a4a3a;
+  --red-claim:#b5473a;
+  --amber-claim:#d99a2b;
+  --green-claim:#4f7a3b;
+  --gray-claim:#b9ada0;
+  --white:#fffaf0;
+  font-size:16px;
+}
+*{box-sizing:border-box;}
+html,body{
+  margin:0;padding:0;height:100%;
+  font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at top, #4a6b45 0%, #2f4030 55%, #1c2a1d 100%);
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+#app{min-height:100vh;position:relative;display:flex;flex-direction:column;}
+.screen{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 16px 60px;}
+.hidden{display:none !important;}
+
+/* ---------- Topbar ---------- */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 18px;background:linear-gradient(180deg,var(--oak-brown),var(--oak-dark));
+  border-bottom:3px solid var(--lantern-gold);
+  box-shadow:0 2px 10px rgba(0,0,0,.4);
+  color:var(--parchment);
+  flex-wrap:wrap;gap:6px;
+}
+#topbar .tb-group{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.tb-stat{display:flex;align-items:center;gap:6px;font-size:.95rem;white-space:nowrap;}
+.tb-stat .val{font-weight:bold;color:var(--lantern-bright);}
+#soundToggle{
+  background:none;border:2px solid var(--lantern-gold);color:var(--lantern-gold);
+  border-radius:8px;padding:4px 10px;cursor:pointer;font-size:1.1rem;line-height:1;
+}
+#soundToggle:hover{background:rgba(232,184,75,.15);}
+#hubBtn{
+  background:none;border:2px solid var(--parchment-dark);color:var(--parchment);
+  border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.9rem;
+}
+#hubBtn:hover{background:rgba(255,255,255,.1);}
+
+/* ---------- Cards / panels ---------- */
+.panel{
+  background:linear-gradient(180deg,var(--parchment),var(--parchment-dark));
+  border:3px solid var(--oak-brown);
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35), inset 0 0 30px rgba(90,61,43,.08);
+  padding:22px 26px;
+  max-width:720px;width:100%;
+  margin:14px auto;
+}
+h1,h2,h3{font-family:Georgia,serif;color:var(--oak-dark);margin-top:0;}
+.title-banner{
+  text-align:center;color:var(--parchment);
+  margin:18px 0 6px;
+}
+.title-banner h1{color:var(--lantern-bright);font-size:2.2rem;letter-spacing:1px;text-shadow:0 2px 6px rgba(0,0,0,.6);margin-bottom:2px;}
+.title-banner .sub{color:var(--parchment-dark);font-style:italic;font-size:1rem;}
+
+button.big-btn{
+  background:linear-gradient(180deg,var(--moss-light),var(--moss));
+  color:var(--white);border:2px solid var(--oak-dark);
+  border-radius:10px;padding:12px 20px;font-size:1.05rem;cursor:pointer;
+  font-family:inherit;font-weight:bold;letter-spacing:.3px;
+  box-shadow:0 4px 0 var(--oak-dark);
+  transition:transform .06s;
+}
+button.big-btn:hover{filter:brightness(1.08);}
+button.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--oak-dark);}
+button.big-btn.secondary{background:linear-gradient(180deg,#c9a86a,#a9824a);}
+button.big-btn.danger{background:linear-gradient(180deg,#b5473a,#7d2f26);}
+button.big-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ---------- Character select ---------- */
+#speciesGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+.species-card{
+  background:var(--white);border:2px solid var(--oak-brown);border-radius:12px;
+  padding:14px 6px;text-align:center;cursor:pointer;transition:all .12s;
+}
+.species-card .emoji{font-size:2.4rem;display:block;}
+.species-card .name{font-weight:bold;margin-top:4px;}
+.species-card .clan{font-size:.75rem;color:var(--ink-soft);font-style:italic;}
+.species-card:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.25);}
+.species-card.selected{border-color:var(--lantern-gold);background:#fff6dc;box-shadow:0 0 0 3px var(--lantern-gold);}
+/* ---------- Profile select ---------- */
+#profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+@media(max-width:560px){#profileGrid{grid-template-columns:1fr;}}
+.profile-card{
+  position:relative;background:var(--white);border:2px solid var(--oak-brown);border-radius:12px;
+  padding:16px 14px;cursor:pointer;transition:all .12s;text-align:center;min-height:132px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.profile-card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.28);border-color:var(--lantern-gold);}
+.profile-card .p-emoji{font-size:2.6rem;line-height:1;position:relative;}
+.profile-card .p-companion{font-size:1.2rem;position:relative;left:-4px;bottom:-6px;}
+.profile-card .p-name{font-weight:bold;font-size:1.15rem;color:var(--oak-dark);margin-top:4px;}
+.profile-card .p-species{font-size:.75rem;color:var(--ink-soft);font-style:italic;}
+.profile-card .p-rank{margin-top:6px;font-size:.88rem;}
+.profile-card .p-progress{font-size:.75rem;color:var(--ink-soft);margin-top:2px;}
+.profile-card.recent{border-color:var(--lantern-gold);box-shadow:0 0 0 3px rgba(232,184,75,.45);}
+.profile-card .p-recent-tag{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  background:var(--lantern-gold);color:var(--oak-dark);font-size:.64rem;font-weight:bold;
+  padding:2px 8px;border-radius:6px;border:1px solid var(--oak-brown);white-space:nowrap;
+}
+.profile-card.empty{background:rgba(255,255,255,.45);border-style:dashed;color:var(--ink-soft);}
+.profile-card.empty .p-emoji{opacity:.5;}
+.profile-card .p-retire{
+  position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;
+  font-size:.72rem;color:var(--ink-soft);font-family:inherit;padding:2px 5px;border-radius:5px;
+}
+.profile-card .p-retire:hover{background:var(--red-claim);color:#fff;}
+#nameInput{
+  width:100%;padding:10px;font-size:1.05rem;border:2px solid var(--oak-brown);
+  border-radius:8px;font-family:inherit;margin-top:6px;background:var(--white);
+}
+.field-label{font-weight:bold;color:var(--oak-dark);margin-top:14px;display:block;}
+
+/* ---------- Hub ---------- */
+#hubHeader{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;}
+#hubHeader .charEmoji{font-size:3rem;}
+#hubHeader .companionEmoji{font-size:1.8rem;align-self:flex-end;margin-left:-6px;}
+#hubHeader .rankIcon{font-size:1.6rem;}
+.hub-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.hub-actions button{width:100%;}
+@media(max-width:520px){.hub-actions{grid-template-columns:1fr;}}
+
+.unlocks-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
+.unlock-badge{
+  background:var(--white);border:2px solid var(--lantern-gold);border-radius:8px;
+  padding:4px 8px;font-size:1.3rem;cursor:default;position:relative;
+}
+.unlock-badge[title]:hover::after{content:attr(title);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);
+  background:var(--oak-dark);color:var(--white);padding:4px 8px;border-radius:6px;font-size:.7rem;white-space:nowrap;z-index:5;}
+
+/* ---------- Territory Map (12x12 grid) ---------- */
+.map-wrap{overflow-x:auto;margin-top:10px;}
+table.tmap{border-collapse:collapse;margin:0 auto;}
+table.tmap th{
+  font-size:.7rem;color:var(--oak-dark);padding:2px;font-weight:bold;
+}
+table.tmap td{
+  width:26px;height:26px;text-align:center;vertical-align:middle;
+  border:1px solid rgba(59,39,27,.35);font-size:.62rem;font-weight:bold;
+  cursor:default;color:rgba(0,0,0,.55);
+}
+.cell-unseen{background:var(--gray-claim);}
+.cell-weak{background:var(--red-claim);color:#fff;}
+.cell-improving{background:var(--amber-claim);color:#3b271b;}
+.cell-mastered{background:var(--green-claim);color:#fff;}
+.cell-double{outline:2px solid var(--oak-dark);outline-offset:-2px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:.8rem;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:14px;height:14px;display:inline-block;border-radius:3px;border:1px solid rgba(0,0,0,.3);}
+
+/* ---------- Practice screen ---------- */
+#practiceHeader{display:flex;justify-content:space-between;width:100%;max-width:520px;margin:0 auto;color:var(--parchment);font-size:.9rem;flex-wrap:wrap;gap:6px;}
+#progressBarOuter{width:100%;max-width:520px;height:10px;background:rgba(0,0,0,.35);border-radius:6px;overflow:hidden;margin:6px auto 0;border:1px solid var(--oak-dark);}
+#progressBarInner{height:100%;background:linear-gradient(90deg,var(--lantern-gold),var(--lantern-bright));width:0%;transition:width .15s;}
+#wallBarOuter{width:100%;max-width:520px;height:14px;background:rgba(0,0,0,.35);border-radius:6px;overflow:hidden;margin:6px auto 0;border:1px solid var(--oak-dark);}
+#wallBarInner{height:100%;background:linear-gradient(90deg,#7d2f26,#b5473a);width:100%;transition:width .3s;}
+
+.question-panel{
+  text-align:center;padding:34px 26px;max-width:480px;
+}
+#questionText{font-size:3rem;font-weight:bold;color:var(--oak-dark);letter-spacing:2px;margin:6px 0 18px;}
+#answerBuffer{
+  font-size:2.2rem;min-height:56px;background:var(--white);border:3px solid var(--oak-brown);
+  border-radius:10px;padding:8px 16px;letter-spacing:4px;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+}
+#answerBuffer.placeholder{color:#bbb;}
+#numpad{display:grid;grid-template-columns:repeat(3,64px);gap:8px;justify-content:center;margin:6px auto 0;}
+#numpad button{
+  font-size:1.3rem;padding:12px 0;border-radius:8px;border:2px solid var(--oak-brown);
+  background:var(--white);cursor:pointer;font-family:inherit;font-weight:bold;color:var(--ink);
+}
+#numpad button:hover{background:var(--parchment-dark);}
+#numpad button.wide{grid-column:span 1;}
+.hint-line{font-size:.8rem;color:var(--ink-soft);margin-top:12px;}
+#stopSessionBtn{margin-top:18px;}
+
+/* ---------- Toasts / feedback ---------- */
+#toastContainer{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;}
+.toast{
+  padding:10px 22px;border-radius:10px;font-weight:bold;font-size:1.2rem;
+  box-shadow:0 6px 18px rgba(0,0,0,.4);
+  animation:toastPop .8s ease forwards;
+}
+.toast.good{background:var(--green-claim);color:#fff;}
+.toast.great{background:var(--lantern-gold);color:var(--oak-dark);}
+.toast.bad{background:var(--red-claim);color:#fff;}
+.toast.mastery{background:linear-gradient(90deg,#e8b84b,#fff3c9);color:var(--oak-dark);border:2px solid var(--oak-brown);}
+@keyframes toastPop{
+  0%{opacity:0;transform:translateY(-8px) scale(.9);}
+  12%{opacity:1;transform:translateY(0) scale(1.03);}
+  25%{transform:scale(1);}
+  78%{opacity:1;}
+  100%{opacity:0;transform:translateY(-6px);}
+}
+
+/* ---------- Rank up overlay ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,15,8,.72);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+}
+.rankup-card{
+  background:radial-gradient(circle at top,#fff6dc,#e6d3a3);
+  border:4px solid var(--lantern-gold);border-radius:18px;
+  padding:34px 40px;text-align:center;max-width:420px;
+  animation:rankIn .5s cubic-bezier(.2,1.4,.4,1);
+  box-shadow:0 0 60px rgba(232,184,75,.6);
+}
+@keyframes rankIn{0%{transform:scale(.4) rotate(-8deg);opacity:0;}100%{transform:scale(1) rotate(0);opacity:1;}}
+.rankup-card .icon{font-size:3.6rem;}
+.rankup-card h2{margin:8px 0 2px;color:var(--oak-dark);}
+.rankup-card p{color:var(--ink-soft);margin:6px 0 16px;}
+
+/* ---------- Quartermaster's Stores ---------- */
+.store-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.store-help{
+  background:none;border:2px solid var(--oak-brown);color:var(--oak-dark);
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-family:inherit;
+  font-weight:bold;font-size:.95rem;line-height:1;flex:none;
+}
+.store-help:hover{background:var(--oak-brown);color:var(--white);}
+.store-purse{
+  text-align:center;background:var(--white);border:2px solid var(--oak-brown);
+  border-radius:10px;padding:7px;margin:12px 0 6px;font-size:1.05rem;
+}
+.store-purse b{color:var(--moss-dark);}
+.store-group-title{
+  margin:18px 0 6px;font-weight:bold;color:var(--oak-dark);font-size:.95rem;
+  border-bottom:1px dashed rgba(59,39,27,.35);padding-bottom:4px;
+}
+.store-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--white);border:2px solid var(--oak-brown);border-radius:10px;
+  padding:9px 12px;margin-bottom:8px;cursor:pointer;transition:all .12s;
+}
+.store-item:hover{transform:translateY(-2px);box-shadow:0 5px 12px rgba(0,0,0,.22);}
+.store-item .si-icon{font-size:1.9rem;line-height:1;flex:none;position:relative;}
+.store-item .si-text{flex:1;text-align:left;min-width:0;}
+.store-item .si-name{font-weight:bold;color:var(--oak-dark);}
+.store-item .si-blurb{font-size:.76rem;color:var(--ink-soft);font-style:italic;}
+.store-item .si-right{flex:none;text-align:right;white-space:nowrap;}
+.store-item .si-price{font-weight:bold;color:var(--oak-dark);}
+.store-item .si-tag{
+  display:inline-block;font-size:.68rem;font-weight:bold;padding:2px 7px;
+  border-radius:5px;border:1px solid var(--oak-brown);margin-top:2px;
+}
+.store-item .si-tag.owned{background:var(--green-claim);color:#fff;}
+.store-item .si-tag.locked{background:var(--gray-claim);color:var(--ink);}
+.store-item .si-req{font-size:.68rem;color:var(--ink-soft);margin-top:2px;}
+.store-item.locked{opacity:.72;}
+.store-item.worn{border-color:var(--lantern-gold);box-shadow:0 0 0 3px rgba(232,184,75,.45);}
+.store-item.worn .si-icon::after{
+  content:'✓';position:absolute;bottom:-4px;right:-8px;font-size:.7rem;
+  background:var(--lantern-gold);color:var(--oak-dark);border:1px solid var(--oak-brown);
+  border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;
+}
+
+/* ---------- Tutorial ---------- */
+.tutorial-card{
+  position:relative;
+  background:linear-gradient(180deg,var(--parchment),var(--parchment-dark));
+  border:3px solid var(--oak-brown);border-radius:16px;
+  padding:26px 30px 22px;max-width:520px;width:calc(100% - 32px);
+  text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.5), inset 0 0 40px rgba(90,61,43,.08);
+  animation:tutIn .22s ease-out;
+}
+@keyframes tutIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}
+.tutorial-card .tut-icon{font-size:2.8rem;line-height:1;}
+.tutorial-card h2{margin:6px 0 10px;color:var(--oak-dark);}
+.tut-body{
+  text-align:left;color:var(--ink);font-size:1rem;line-height:1.5;
+  min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:10px;
+}
+.tut-body p{margin:0;}
+.tut-body .tut-em{color:var(--oak-dark);font-weight:bold;}
+.tut-skip{
+  position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;
+  font-size:1rem;color:var(--ink-soft);font-family:inherit;padding:4px 7px;border-radius:6px;line-height:1;
+}
+.tut-skip:hover{background:var(--oak-brown);color:var(--white);}
+.tut-dots{display:flex;gap:7px;justify-content:center;margin:16px 0 14px;}
+.tut-dots i{
+  width:9px;height:9px;border-radius:50%;background:rgba(59,39,27,.28);
+  display:inline-block;transition:all .15s;cursor:pointer;
+}
+.tut-dots i.on{background:var(--lantern-gold);box-shadow:0 0 0 2px var(--oak-brown);transform:scale(1.15);}
+.tut-nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+#tutorialBtn.highlight{
+  animation:tutGlow 1.9s ease-in-out infinite;
+}
+@keyframes tutGlow{
+  0%,100%{box-shadow:0 4px 0 var(--oak-dark);}
+  50%{box-shadow:0 4px 0 var(--oak-dark), 0 0 18px 3px rgba(232,184,75,.75);}
+}
+
+/* ---------- Summary ---------- */
+.summary-stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(59,39,27,.3);font-size:1.05rem;}
+.summary-stat .val{font-weight:bold;color:var(--moss-dark);}
+
+/* ---------- Parent / Ledger ---------- */
+#screenParent .panel{max-width:900px;}
+table.ledger-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.85rem;}
+table.ledger-table th,table.ledger-table td{border:1px solid rgba(59,39,27,.25);padding:5px 8px;text-align:left;}
+table.ledger-table th{background:var(--parchment-dark);}
+.weak-tag{color:#fff;background:var(--red-claim);padding:1px 6px;border-radius:5px;font-size:.72rem;}
+.ledger-link{
+  position:fixed;bottom:10px;right:12px;background:rgba(59,39,27,.55);color:var(--parchment-dark);
+  border:1px solid rgba(232,184,75,.5);border-radius:8px;padding:6px 10px;font-size:.72rem;cursor:pointer;
+  font-family:inherit;z-index:20;
+}
+.ledger-link:hover{background:rgba(59,39,27,.85);color:var(--lantern-bright);}
+
+/* ---------- Riddle ---------- */
+.riddle-step{font-size:1.6rem;font-weight:bold;color:var(--oak-dark);margin:10px 0;}
+.riddle-sub{font-size:1.15rem;color:var(--ink-soft);margin-bottom:16px;}
+
+::selection{background:var(--lantern-gold);}
+.small-note{font-size:.78rem;color:var(--ink-soft);}
+.center{text-align:center;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar" class="hidden">
+    <div class="tb-group" id="tbStats">
+      <div class="tb-stat">🌰 <span class="val" id="tbAcorns">0</span></div>
+      <div class="tb-stat">🔥 <span class="val" id="tbStreak">0</span></div>
+      <div class="tb-stat"><span id="tbRankIcon">🌱</span> <span class="val" id="tbRank">Kit</span></div>
+    </div>
+    <div class="tb-group">
+      <button id="hubBtn" title="Return to the Warren">🏰 Warren</button>
+      <button id="profileBtn" title="Switch recruit">👥 Recruits</button>
+      <button id="soundToggle" title="Toggle sound">🔇</button>
+    </div>
+  </div>
+
+  <!-- PROFILE SELECT -->
+  <div id="screenProfileSelect" class="screen">
+    <div class="title-banner">
+      <h1>The Fact Warren</h1>
+      <div class="sub">Who marches today?</div>
+    </div>
+    <div class="panel">
+      <h2 class="center" style="margin-bottom:4px;">The Muster Roll</h2>
+      <p class="small-note center">Up to four recruits may train at the Oakstone Guard.</p>
+      <div id="profileGrid"></div>
+      <div class="center" style="margin-top:18px;padding-top:16px;border-top:1px dashed rgba(59,39,27,.3);">
+        <button class="big-btn secondary" id="tutorialBtn">📖 The Recruit's Handbook</button>
+        <div class="small-note" style="margin-top:6px;">How training works — about a minute</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div id="screenCharacterSelect" class="screen hidden">
+    <div class="title-banner">
+      <h1>The Fact Warren</h1>
+      <div class="sub">Join the Oakstone Guard</div>
+    </div>
+    <div class="panel">
+      <h2>Choose your kind</h2>
+      <div id="speciesGrid"></div>
+      <label class="field-label" for="nameInput">Your name, recruit:</label>
+      <input id="nameInput" type="text" maxlength="16" placeholder="e.g. Rilla Thorn">
+      <div class="center" style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="big-btn secondary" id="characterBackBtn">Back</button>
+        <button class="big-btn" id="beginBtn" disabled>Swear the Oath &amp; Begin ⚔️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUB -->
+  <div id="screenHub" class="screen hidden">
+    <div class="panel">
+      <div id="hubHeader"></div>
+      <div class="unlocks-row" id="unlocksRow"></div>
+      <div class="hub-actions" id="hubActions"></div>
+    </div>
+    <div class="panel">
+      <h3 class="center" style="margin-bottom:2px;">Territory of the Warren</h3>
+      <p class="small-note center">Facts you have claimed as sworn strikes</p>
+      <div class="map-wrap" id="hubMapWrap"></div>
+      <div class="legend">
+        <span><i style="background:var(--gray-claim)"></i> Unclaimed</span>
+        <span><i style="background:var(--red-claim)"></i> Contested</span>
+        <span><i style="background:var(--amber-claim)"></i> Skirmishing</span>
+        <span><i style="background:var(--green-claim)"></i> Claimed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRACTICE (diagnostic / adaptive / boss) -->
+  <div id="screenPractice" class="screen hidden">
+    <div id="practiceHeader">
+      <div id="phLeft"></div>
+      <div id="phRight"></div>
+    </div>
+    <div id="progressBarOuter"><div id="progressBarInner"></div></div>
+    <div id="wallBarOuter" class="hidden"><div id="wallBarInner"></div></div>
+
+    <div class="panel question-panel">
+      <div class="small-note" id="questionLabel">Strike true!</div>
+      <div id="questionText">? × ?</div>
+      <div id="answerBuffer" class="placeholder">—</div>
+      <div id="numpad"></div>
+      <div class="hint-line">Type the answer, press <b>Enter</b>. <b>Backspace</b> to fix.</div>
+    </div>
+    <button class="big-btn secondary" id="stopSessionBtn">Return to the Warren</button>
+  </div>
+
+  <!-- ELDER'S RIDDLE -->
+  <div id="screenRiddle" class="screen hidden">
+    <div class="panel" style="max-width:520px;">
+      <h2 class="center">The Elder's Riddle</h2>
+      <p class="small-note center">Break the great sum into smaller true-strikes.</p>
+      <div class="center" id="riddleMain"></div>
+      <div id="riddleStepArea"></div>
+      <div id="answerBufferRiddle" class="placeholder" style="font-size:2rem;min-height:52px;background:var(--white);border:3px solid var(--oak-brown);border-radius:10px;padding:8px 16px;letter-spacing:3px;display:flex;align-items:center;justify-content:center;margin:14px auto;max-width:220px;">—</div>
+      <div class="hint-line center">Type your answer, press <b>Enter</b>.</div>
+    </div>
+    <button class="big-btn secondary" id="stopRiddleBtn">Return to the Warren</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="screenSummary" class="screen hidden">
+    <div class="panel">
+      <h2 class="center" id="summaryTitle">The Day's Chronicle</h2>
+      <div id="summaryBody"></div>
+      <div class="center" style="margin-top:20px;">
+        <button class="big-btn" id="summaryContinueBtn">Return to the Warren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUARTERMASTER'S STORES -->
+  <div id="screenStore" class="screen hidden">
+    <div class="panel" style="max-width:640px;">
+      <div class="store-head">
+        <h2 style="margin:0;">🏪 The Quartermaster's Stores</h2>
+        <button id="storeHelpBtn" class="store-help" title="How the Stores work">?</button>
+      </div>
+      <p class="small-note" style="margin-top:2px;">Goods bought are yours for good. Wear what you like, when you like.</p>
+      <div class="store-purse">Your purse: <b id="storePurse">0</b> 🌰</div>
+      <div id="storeList"></div>
+      <div class="center" style="margin-top:20px;">
+        <button class="big-btn secondary" id="storeBackBtn">Back to the Warren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARENT / WARDEN'S LEDGER -->
+  <div id="screenParent" class="screen hidden">
+    <div class="panel">
+      <h2>📜 The Warden's Ledger</h2>
+      <p class="small-note">A private accounting for the Warden (parent view) — not part of the recruit's game.</p>
+      <div id="parentStats"></div>
+      <h3>Weakest Strikes</h3>
+      <div id="parentWeak"></div>
+      <h3>Full Territory Ledger</h3>
+      <div id="parentMapWrap" class="map-wrap"></div>
+      <div class="legend">
+        <span><i style="background:var(--gray-claim)"></i> Unseen</span>
+        <span><i style="background:var(--red-claim)"></i> Weak</span>
+        <span><i style="background:var(--amber-claim)"></i> Improving</span>
+        <span><i style="background:var(--green-claim)"></i> Mastered</span>
+      </div>
+      <div class="center" style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="big-btn secondary" id="parentBackBtn">Back to the Warren</button>
+        <button class="big-btn danger" id="parentResetBtn">Reset All Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rankUpOverlay" class="overlay hidden">
+    <div class="rankup-card">
+      <div class="icon" id="rankUpIcon">🛡️</div>
+      <h2 id="rankUpTitle">Rank Achieved: Guard</h2>
+      <p id="rankUpDesc">Well struck! You have earned this title.</p>
+      <button class="big-btn" id="rankUpDismiss">Hold Fast</button>
+    </div>
+  </div>
+
+  <div id="tutorialOverlay" class="overlay hidden">
+    <div class="tutorial-card">
+      <button class="tut-skip" id="tutSkipBtn" title="Close the handbook">✕</button>
+      <div class="tut-icon" id="tutIcon">⚔️</div>
+      <h2 id="tutTitle">The Oakstone Guard</h2>
+      <div class="tut-body" id="tutBody"></div>
+      <div class="tut-dots" id="tutDots"></div>
+      <div class="tut-nav">
+        <button class="big-btn secondary" id="tutBackBtn">Back</button>
+        <button class="big-btn" id="tutNextBtn">Next</button>
+      </div>
+      <div class="small-note" style="margin-top:10px;">← → to turn the page · Esc to close</div>
+    </div>
+  </div>
+
+  <div id="confirmOverlay" class="overlay hidden">
+    <div class="rankup-card">
+      <div class="icon">⚠️</div>
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmMessage"></p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="big-btn secondary" id="confirmCancelBtn">Cancel</button>
+        <button class="big-btn danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="ledger-link" id="ledgerLink">📜 Warden's Ledger</button>
+  <div id="toastContainer"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================= CONSTANTS ============================= */
+const STORAGE_KEY = 'factWarren_v1';          // legacy single-profile save, migrated on first load
+const PROFILES_KEY = 'factWarren_profiles_v1';
+const SETTINGS_KEY = 'factWarren_settings_v1'; // device-level, shared by all profiles
+const MAX_PROFILES = 4;
+const FAST_MS = 2000;
+const SLOW_MS = 3500;
+const MASTERY_STREAK = 4;
+const TOTAL_FACTS = 78;
+const BOSS_TIME_MS = 60000;
+const BOSS_QUESTIONS = 20;
+
+const SPECIES = [
+  {id:'mouse', emoji:'🐭', name:'Mouse', clan:'Quickwhisker Clan'},
+  {id:'hare', emoji:'🐇', name:'Hare', clan:'Fleetfoot Clan'},
+  {id:'badger', emoji:'🦡', name:'Badger', clan:'Stoneclaw Clan'},
+  {id:'squirrel', emoji:'🐿️', name:'Squirrel', clan:'Nimbletail Clan'},
+  {id:'otter', emoji:'🦦', name:'Otter', clan:'Rivermark Clan'},
+  {id:'fox', emoji:'🦊', name:'Fox', clan:'Emberstep Clan'}
+];
+
+const RANKS = [
+  {name:'Kit', min:0, icon:'🌱', unlock:'Beginning your training in the Oakstone Guard.'},
+  {name:'Scout', min:10, icon:'🍃', unlock:'Named a Scout of the Warren, trusted to range beyond the wall.'},
+  {name:'Blade-Sworn', min:25, icon:'⚔️', unlock:'Sworn to the blade before the Elders.'},
+  {name:'Guard', min:45, icon:'🛡️', unlock:'Raised to full Guard, with a post upon the Oakstone wall.'},
+  {name:'Warden', min:60, icon:'🏰', unlock:'Made Warden, answerable for the Warren itself.'},
+  {name:'Legend of the Warren', min:70, icon:'👑', unlock:"Your name is etched into the Warren's tapestry."}
+];
+
+/* Goods are bought at the Quartermaster's with acorns; ranks above grant only
+   title and insignia. Prices are set against the measured earn rate of roughly
+   33 acorns per answered fact — a full Trial of Names yields about 2,500. */
+const STORE_ITEMS = [
+  {id:'comp_sparrow',  slot:'companion', icon:'🐦', name:'Sparrow Scout',          cost:1500,  minRank:0, blurb:'Quick eyes, quicker wings.'},
+  {id:'comp_hedgehog', slot:'companion', icon:'🦔', name:'Hedgehog Sapper',        cost:4000,  minRank:0, blurb:'Slow to anger, impossible to shift.'},
+  {id:'comp_owl',      slot:'companion', icon:'🦉', name:'Owl Watcher',            cost:12000, minRank:2, blurb:'Keeps the night watch so you need not.'},
+  {id:'comp_eagle',    slot:'companion', icon:'🦅', name:'Eagle of the High Crag', cost:40000, minRank:3, blurb:'Answers to no one. Follows you regardless.'},
+
+  {id:'cloak_moss',    slot:'cloak', icon:'🧣', name:'Moss-Green Cloak', cost:1500,  minRank:0, colour:'#4f7a3b', blurb:'The green of the deep wood.'},
+  {id:'cloak_russet',  slot:'cloak', icon:'🧣', name:'Russet Cloak',     cost:3500,  minRank:0, colour:'#a9542a', blurb:'Autumn bracken, worn proudly.'},
+  {id:'cloak_crimson', slot:'cloak', icon:'🧣', name:'Crimson Cloak',    cost:10000, minRank:1, colour:'#b5473a', blurb:'Seen from the far wall.'},
+  {id:'cloak_midnight',slot:'cloak', icon:'🧣', name:'Midnight Cloak',   cost:30000, minRank:4, colour:'#2f3a5a', blurb:'Woven for those who move unseen.'},
+
+  {id:'banner_oakleaf',slot:'banner', icon:'🏳️', name:'Oakleaf Banner',      cost:2500,  minRank:0, colour:'#6b8c5f', blurb:'The oldest standard of the Guard.'},
+  {id:'banner_gold',   slot:'banner', icon:'🏳️', name:'Gold Banner',         cost:15000, minRank:3, colour:'#e8b84b', blurb:'Lantern-gold, raised at muster.'},
+  {id:'banner_tapestry',slot:'banner',icon:'🏳️', name:"Warren's Tapestry",   cost:50000, minRank:5, colour:'#7d2f26', blurb:'Your deeds, stitched in thread.'}
+];
+const SLOT_LABELS = {companion:'Companions', cloak:'Cloaks', banner:'Banners'};
+
+/* ============================= STATE ============================= */
+let state = null;          // the active profile's progress, or null on the profile screen
+let profiles = [];         // MAX_PROFILES slots; null = empty slot
+let activeSlot = null;
+let pendingNewSlot = null; // slot being filled by the character-select screen
+let settings = {soundOn:false};
+let audioCtx = null;
+
+function defaultFacts(){
+  const facts = {};
+  for(let a=1;a<=12;a++){
+    for(let b=a;b<=12;b++){
+      facts[a+'x'+b] = {a,b,correct:0,attempts:0,avgTimeMs:0,lastSeen:0,speedStreak:0,status:'unseen'};
+    }
+  }
+  return facts;
+}
+
+function defaultState(){
+  return {
+    character:null,
+    createdAt:Date.now(),
+    lastPlayed:Date.now(),
+    acorns:0,        // spendable purse
+    acornsEarned:0,  // lifetime total, never spent
+    streakRecord:0,
+    sessionsCount:0,
+    diagnosticDone:false,
+    facts:defaultFacts(),
+    owned:[],
+    equipped:{companion:null, cloak:null, banner:null},
+    storeIntroSeen:false,
+    chronicle:[] // history of session summaries (lightweight)
+  };
+}
+
+function hydrateProfile(parsed){
+  const d = defaultState();
+  // Merge saved facts onto the full default table first: a save missing any fact
+  // (older version, partial write) must still come back with all 78 present.
+  const facts = Object.assign(d.facts, parsed.facts||{});
+  const p = Object.assign(d, parsed, {facts});
+  p.equipped = Object.assign({companion:null, cloak:null, banner:null}, parsed.equipped||{});
+  if(!Array.isArray(p.owned)) p.owned = [];
+  // Saves from before the store existed have no lifetime figure; their purse
+  // total IS everything they ever earned, so seed from it rather than zeroing.
+  if(parsed.acornsEarned===undefined) p.acornsEarned = parsed.acorns||0;
+  delete p.soundOn; // sound moved to device-level settings
+  return p;
+}
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(raw) settings = Object.assign({soundOn:false}, JSON.parse(raw));
+  }catch(e){}
+}
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
+}
+
+function loadProfiles(){
+  profiles = new Array(MAX_PROFILES).fill(null);
+  try{
+    const raw = localStorage.getItem(PROFILES_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      (parsed.profiles||[]).slice(0,MAX_PROFILES).forEach((p,i)=>{
+        if(p) profiles[i] = hydrateProfile(p);
+      });
+      return;
+    }
+  }catch(e){}
+  migrateLegacySave();
+}
+
+// A save from before profiles existed becomes the first recruit, so nobody loses progress.
+function migrateLegacySave(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    if(parsed && parsed.character){
+      profiles[0] = hydrateProfile(parsed);
+      if(parsed.soundOn){ settings.soundOn = true; saveSettings(); }
+      saveProfiles();
+    }
+    localStorage.removeItem(STORAGE_KEY);
+  }catch(e){}
+}
+
+function saveProfiles(){
+  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify({profiles})); }catch(e){}
+}
+// Every existing call site mutates `state` then calls saveState(); persisting the
+// whole container keeps those call sites correct without touching them.
+function saveState(){ saveProfiles(); }
+
+/* ============================= AUDIO ============================= */
+function ensureAudioCtx(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type, delay, vol){
+  if(!settings.soundOn || !audioCtx) return;
+  type = type||'sine'; delay = delay||0; vol = vol===undefined?0.22:vol;
+  const t0 = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(vol, t0+0.012);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+// square/triangle "chip" blip with a fast pitch drop — the 16-bit-era workhorse for hits and swings
+function playBlip(freqStart, freqEnd, dur, type, delay, vol){
+  if(!settings.soundOn || !audioCtx) return;
+  type = type||'square'; delay = delay||0; vol = vol===undefined?0.2:vol;
+  const t0 = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freqStart, t0);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,20), t0+dur);
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+const noiseBufferCache = {};
+function getNoiseBuffer(duration){
+  const key = Math.round(duration*1000);
+  if(noiseBufferCache[key]) return noiseBufferCache[key];
+  const bufferSize = Math.max(1, Math.floor(audioCtx.sampleRate*duration));
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i] = Math.random()*2-1;
+  noiseBufferCache[key] = buffer;
+  return buffer;
+}
+// filtered white-noise burst — sword whooshes (bandpass, sweeping high->mid) and dull thuds (lowpass, sweeping low)
+function playNoiseBurst(opts){
+  if(!settings.soundOn || !audioCtx) return;
+  const duration = opts.duration||0.14, delay = opts.delay||0, vol = opts.vol===undefined?0.22:opts.vol;
+  const t0 = audioCtx.currentTime + delay;
+  const src = audioCtx.createBufferSource();
+  src.buffer = getNoiseBuffer(duration);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = opts.filterType||'bandpass';
+  filter.Q.value = opts.q===undefined?0.9:opts.q;
+  filter.frequency.setValueAtTime(opts.freqStart||1200, t0);
+  filter.frequency.exponentialRampToValueAtTime(Math.max(opts.freqEnd||400,20), t0+duration);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+  src.connect(filter).connect(gain).connect(audioCtx.destination);
+  src.start(t0); src.stop(t0+duration+0.02);
+}
+// a handful of short, slightly-detuned square/triangle tones ring together like struck steel
+function playClang(freqs, dur, vol, delay){
+  if(!settings.soundOn || !audioCtx) return;
+  delay = delay||0; vol = vol===undefined?0.16:vol;
+  const t0 = audioCtx.currentTime + delay;
+  freqs.forEach((f,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = i===0 ? 'square' : 'triangle';
+    osc.frequency.setValueAtTime(f, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(vol/(i*0.6+1), t0+0.004);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  });
+}
+// well-struck: quick sword swing (whoosh) into a bright steel clang
+function sndCorrect(){
+  playNoiseBurst({duration:0.08, filterType:'bandpass', freqStart:2200, freqEnd:800, q:0.7, vol:0.16});
+  playClang([1046,1568], 0.11, 0.15, 0.045);
+}
+// true strike: a faster, harder swing and a bigger, brighter clash
+function sndTrueStrike(){
+  playNoiseBurst({duration:0.1, filterType:'bandpass', freqStart:3200, freqEnd:900, q:0.8, vol:0.2});
+  playClang([1568,2093,2637], 0.16, 0.17, 0.055);
+}
+// hold fast: a dull, cartoonish thump — not a triumphant tone, no sharp edges
+function sndWrong(){
+  playNoiseBurst({duration:0.17, filterType:'lowpass', freqStart:700, freqEnd:110, q:0.6, vol:0.24});
+  playBlip(150,70,0.14,'square',0.015,0.1);
+}
+// sworn strike: chiptune fanfare flourish (square-wave arpeggio) capped with a ringing clang
+function sndMastery(){
+  [880,1108,1318,1760].forEach((f,i)=>playTone(f,0.09,'square',i*0.05,0.13));
+  playClang([1760,2217,2637], 0.22, 0.16, 0.22);
+}
+// rank up: bright 16-bit-style victory arpeggio
+function sndRankUp(){
+  [523,659,784,1046,1318].forEach((f,i)=>playTone(f,0.15,'square',i*0.09,0.16));
+  playClang([1318,1568,2093], 0.3, 0.18, 0.46);
+}
+function sndClick(){ playTone(440,0.05,'square',0,0.08); }
+
+/* ============================= MUSIC ENGINE ============================= */
+/* Tiny procedural chiptune sequencer. Every track shares the same key and
+   4-bar D-minor chord progression (Dm - Bb - F - C) and the same square/
+   triangle voice palette, so the whole score reads as one game — tempo,
+   rhythm density and instrumentation set each section apart. */
+const NOTE_INDEX = {C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
+function noteFreq(name){
+  const m = name.match(/^([A-G]#?)(\d)$/);
+  if(!m) return 440;
+  const semitoneFromA4 = (parseInt(m[2])-4)*12 + (NOTE_INDEX[m[1]]-9);
+  return 440*Math.pow(2, semitoneFromA4/12);
+}
+function arp(start, notes, step, vol){ return notes.map((n,i)=>[start+i*step, n, step, vol]); }
+function sustain(start, note, beats, vol){ return [[start, note, beats, vol]]; }
+
+const MUSIC_TRACKS = {
+  select: { // The Oath — slow ceremonial arpeggio
+    tempo:88, beats:16, leadType:'triangle', bassType:'triangle',
+    bass:[].concat(sustain(0,'D3',4,0.45),sustain(4,'A#2',4,0.4),sustain(8,'F3',4,0.45),sustain(12,'C3',4,0.45)),
+    lead:[].concat(
+      arp(0,['D4','F4','A4','D5'],1,0.4),
+      arp(4,['A#3','D4','F4','A#4'],1,0.4),
+      arp(8,['F4','A4','C5','F5'],1,0.42),
+      arp(12,['C4','E4','G4','C5'],1,0.4)
+    )
+  },
+  hub: { // The Warren — warm, bouncy village theme
+    tempo:112, beats:16, leadType:'square', bassType:'triangle',
+    bass:[].concat(
+      arp(0,['D3','A3','D3','A3'],1,0.5),
+      arp(4,['A#2','F3','A#2','F3'],1,0.5),
+      arp(8,['F3','C4','F3','C4'],1,0.5),
+      arp(12,['C3','G3','C3','G3'],1,0.5)
+    ),
+    lead:[].concat(
+      arp(0,['D4','F4','A4','G4','F4','D4','E4','F4'],0.5,0.4),
+      arp(4,['F4','A#4','D5','C5','A#4','F4','G4','A#4'],0.5,0.4),
+      arp(8,['F4','A4','C5','A4','F4','D4','F4','A4'],0.5,0.4),
+      arp(12,['C4','E4','G4','C5','G4','E4','D4','C4'],0.5,0.4)
+    ),
+    perc:[1,3,5,7,9,11,13,15].map(b=>[b,null,0.1,0.25])
+  },
+  training: { // The Hollow — focused, metronomic drilling
+    tempo:126, beats:16, leadType:'square', bassType:'triangle',
+    bass:[].concat(
+      arp(0,['D3','D4','D3','D4'],1,0.48),
+      arp(4,['A#2','A#3','A#2','A#3'],1,0.48),
+      arp(8,['F3','F4','F3','F4'],1,0.48),
+      arp(12,['C3','C4','C3','C4'],1,0.48)
+    ),
+    lead:[].concat(
+      arp(0,['D5','A4','D5','A4','D5','A4','D5','A4'],0.5,0.35),
+      arp(4,['A#4','F5','A#4','F5','A#4','F5','A#4','F5'],0.5,0.35),
+      arp(8,['F4','C5','F4','C5','F4','C5','F4','C5'],0.5,0.35),
+      arp(12,['C5','G4','C5','G4','C5','G4','C5','G4'],0.5,0.35)
+    ),
+    perc:Array.from({length:16},(_,i)=>[i,null,0.08,0.2])
+  },
+  boss: { // Trial by Combat — fast, urgent, driving
+    tempo:150, beats:16, leadType:'square', bassType:'square',
+    bass:[].concat(
+      arp(0,['D3','D4','D3','D4','D3','D4','D3','D4'],0.5,0.45),
+      arp(4,['A#2','A#3','A#2','A#3','A#2','A#3','A#2','A#3'],0.5,0.45),
+      arp(8,['F3','F4','F3','F4','F3','F4','F3','F4'],0.5,0.45),
+      arp(12,['C3','C4','C3','C4','C3','C4','C3','C4'],0.5,0.45)
+    ),
+    lead:[].concat(
+      arp(0,['D5','F5','A5','F5','A5','G5','F5','D5'],0.5,0.4),
+      arp(4,['A#4','D5','F5','A#5','F5','D5','A#4','G4'],0.5,0.4),
+      arp(8,['F4','A4','C5','A4','C5','A4','F4','D4'],0.5,0.4),
+      arp(12,['C5','E5','G5','E5','G5','F5','E5','D5'],0.5,0.4)
+    ),
+    perc:Array.from({length:32},(_,i)=>[i*0.5,null,0.06,0.26])
+  },
+  riddle: { // The Elder's Riddle — sparse, mysterious, call-and-response
+    tempo:98, beats:16, leadType:'triangle', bassType:'triangle',
+    bass:[
+      [0,'D3',1.5,0.42],[2.5,'A2',1,0.32],
+      [4,'A#2',1.5,0.42],[6.5,'F2',1,0.32],
+      [8,'F3',1.5,0.42],[10.5,'C3',1,0.32],
+      [12,'C3',1.5,0.42],[14.5,'G2',1,0.32]
+    ],
+    lead:[
+      [0,'D5',1,0.36],[2,'A4',1,0.3],
+      [4,'F5',1,0.36],[6,'D5',1,0.3],
+      [8,'F5',0.75,0.36],[9,'A5',0.75,0.36],
+      [12,'G4',0.75,0.3],[13,'E4',0.75,0.3],[14,'D4',2,0.34]
+    ],
+    perc:[[0,null,0.06,0.14],[4,null,0.06,0.14],[8,null,0.06,0.14],[12,null,0.06,0.14]]
+  }
+};
+
+let desiredMusicTrack = null;
+let playingMusicTrack = null;
+let musicTimeoutId = null;
+let musicNodes = [];
+
+function stopMusicPlayback(){
+  if(musicTimeoutId){ clearTimeout(musicTimeoutId); musicTimeoutId = null; }
+  musicNodes.forEach(n=>{ try{ n.node.stop(0); }catch(e){} });
+  musicNodes = [];
+  playingMusicTrack = null;
+}
+// drop references to nodes that have already finished playing, so a long session doesn't accumulate them forever
+function pruneMusicNodes(){
+  const now = audioCtx.currentTime;
+  musicNodes = musicNodes.filter(n=>n.endTime > now);
+}
+function setMusicTrack(name){
+  desiredMusicTrack = name;
+  if(!settings.soundOn || !audioCtx){ stopMusicPlayback(); return; }
+  if(playingMusicTrack === name) return;
+  stopMusicPlayback();
+  const track = MUSIC_TRACKS[name];
+  if(!track) return;
+  playingMusicTrack = name;
+  scheduleMusicLoop(track, name, audioCtx.currentTime + 0.06);
+}
+function scheduleMusicLoop(track, name, loopStart){
+  if(playingMusicTrack !== name) return;
+  pruneMusicNodes();
+  const secPerBeat = 60/track.tempo;
+  const loopDur = secPerBeat*track.beats;
+  (track.bass||[]).forEach(ev=>scheduleMusicNote('bass', ev, loopStart, secPerBeat, track.bassType));
+  (track.lead||[]).forEach(ev=>scheduleMusicNote('lead', ev, loopStart, secPerBeat, track.leadType));
+  (track.perc||[]).forEach(ev=>scheduleMusicNote('perc', ev, loopStart, secPerBeat));
+  const nextLoopStart = loopStart + loopDur;
+  const delayMs = Math.max(10, (nextLoopStart - audioCtx.currentTime - 0.25)*1000);
+  musicTimeoutId = setTimeout(()=>{ scheduleMusicLoop(track, name, nextLoopStart); }, delayMs);
+}
+function scheduleMusicNote(voiceKey, ev, loopStart, secPerBeat, oscType){
+  const [beat, note, durBeats, vel] = ev;
+  const t0 = loopStart + beat*secPerBeat;
+  const dur = durBeats*secPerBeat;
+  if(voiceKey==='perc'){
+    const capDur = Math.min(dur,0.08);
+    const src = audioCtx.createBufferSource();
+    src.buffer = getNoiseBuffer(capDur);
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'highpass'; filter.frequency.value = 4500;
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime((vel||0.5)*0.14, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+capDur);
+    src.connect(filter).connect(gain).connect(audioCtx.destination);
+    src.start(t0); src.stop(t0+capDur+0.02);
+    musicNodes.push({node:src, endTime:t0+capDur+0.02});
+    return;
+  }
+  if(note==null) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = oscType || (voiceKey==='bass' ? 'triangle' : 'square');
+  const gain = audioCtx.createGain();
+  const peakVol = (vel||0.4) * (voiceKey==='bass'?0.2:0.16);
+  osc.frequency.setValueAtTime(noteFreq(note), t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(peakVol, t0+0.01);
+  const sustainEnd = Math.max(t0+0.02, t0+dur*0.82);
+  gain.gain.setValueAtTime(peakVol, sustainEnd);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+  musicNodes.push({node:osc, endTime:t0+dur+0.02});
+}
+function unlockAudioOnce(){
+  ensureAudioCtx();
+  if(settings.soundOn && desiredMusicTrack) setMusicTrack(desiredMusicTrack);
+  document.removeEventListener('pointerdown', unlockAudioOnce);
+  document.removeEventListener('keydown', unlockAudioOnce);
+}
+
+/* ============================= UTIL ============================= */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function factKey(a,b){ return Math.min(a,b)+'x'+Math.max(a,b); }
+function allFactKeys(){ return Object.keys(state.facts); }
+function masteredCount(){
+  return allFactKeys().reduce((n,k)=> n + (state.facts[k].status==='mastered'?1:0), 0);
+}
+function getRankObj(count){
+  let r = RANKS[0];
+  for(const rk of RANKS){ if(count>=rk.min) r = rk; }
+  return r;
+}
+function getRankIndex(count){
+  let idx=0;
+  RANKS.forEach((rk,i)=>{ if(count>=rk.min) idx=i; });
+  return idx;
+}
+function fmtTime(ms){ return (ms/1000).toFixed(1)+' s'; }
+function fmtSec(ms){ return (ms/1000).toFixed(2)+' s'; }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+function toast(msg, cls){
+  const t = document.createElement('div');
+  t.className = 'toast '+(cls||'good');
+  t.textContent = msg;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>t.remove(), 850);
+}
+
+/* ============================= FACT MODEL UPDATE ============================= */
+function updateFactAfterAnswer(fact, correct, timeMs){
+  fact.attempts++;
+  if(correct) fact.correct++;
+  fact.avgTimeMs = fact.avgTimeMs===0 ? timeMs : Math.round(fact.avgTimeMs*0.7 + timeMs*0.3);
+  fact.lastSeen = Date.now();
+  const accuracy = fact.correct/fact.attempts;
+  const wasMastered = fact.status==='mastered';
+  if(correct && timeMs<=FAST_MS){
+    fact.speedStreak = (fact.speedStreak||0)+1;
+  } else {
+    fact.speedStreak = 0;
+  }
+  let newlyMastered = false;
+  if(fact.speedStreak >= MASTERY_STREAK){
+    if(!wasMastered) newlyMastered = true;
+    fact.status = 'mastered';
+  } else if(!correct || accuracy<0.6 || fact.avgTimeMs>SLOW_MS){
+    fact.status = 'weak';
+  } else {
+    fact.status = wasMastered ? 'improving' : 'improving';
+  }
+  return {newlyMastered};
+}
+
+/* ============================= WEIGHTED PICK ============================= */
+let recentKeys = [];
+function weightForFact(f){
+  let w = 1;
+  if(f.status==='unseen') w += 6;
+  if(f.status==='weak') w += 8;
+  if(f.status==='improving') w += 4;
+  if(f.status==='mastered') w = 0.6;
+  if(f.avgTimeMs > SLOW_MS) w += 3;
+  const hoursSince = f.lastSeen ? (Date.now()-f.lastSeen)/3600000 : 999;
+  w += Math.min(hoursSince, 5);
+  const key = f.a+'x'+f.b;
+  const ri = recentKeys.indexOf(key);
+  if(ri !== -1) w *= 0.12;
+  return Math.max(w, 0.05);
+}
+function pickWeightedFactKey(){
+  const keys = allFactKeys();
+  const weights = keys.map(k=>weightForFact(state.facts[k]));
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<keys.length;i++){
+    r -= weights[i];
+    if(r<=0) return keys[i];
+  }
+  return keys[keys.length-1];
+}
+function trackRecent(key){
+  recentKeys.push(key);
+  if(recentKeys.length>4) recentKeys.shift();
+}
+
+/* ============================= SESSION ENGINE ============================= */
+let session = null; // current practice session
+let questionStartTs = 0;
+let currentFactKey = null;
+let currentDisplay = null; // [a,b] order shown
+let inputBuffer = '';
+let wallHealth = 100;
+let bossTimerHandle = null;
+
+function startDiagnostic(){
+  setMusicTrack('training');
+  const keys = shuffle(allFactKeys());
+  session = {
+    mode:'diagnostic', queue:keys, index:0,
+    correctCount:0, totalCount:keys.length,
+    sessionAcorns:0, sessionStreak:0, sessionStreakMax:0,
+    fastestMs:Infinity, newlyMastered:[], startedAt:Date.now(),
+    trueStrikes:0
+  };
+  showScreen('screenPractice');
+  document.getElementById('wallBarOuter').classList.add('hidden');
+  document.getElementById('stopSessionBtn').classList.add('hidden');
+  mountNextQuestion();
+}
+
+function startPractice(){
+  setMusicTrack('training');
+  session = {
+    mode:'practice', index:0, totalCount:Infinity,
+    correctCount:0, sessionAcorns:0, sessionStreak:0, sessionStreakMax:0,
+    fastestMs:Infinity, newlyMastered:[], startedAt:Date.now(),
+    trueStrikes:0
+  };
+  showScreen('screenPractice');
+  document.getElementById('wallBarOuter').classList.add('hidden');
+  document.getElementById('stopSessionBtn').classList.remove('hidden');
+  mountNextQuestion();
+}
+
+function startBoss(){
+  setMusicTrack('boss');
+  wallHealth = 100;
+  session = {
+    mode:'boss', index:0, totalCount:BOSS_QUESTIONS,
+    correctCount:0, sessionAcorns:0, sessionStreak:0, sessionStreakMax:0,
+    fastestMs:Infinity, newlyMastered:[], startedAt:Date.now(),
+    endsAt: Date.now()+BOSS_TIME_MS, trueStrikes:0
+  };
+  showScreen('screenPractice');
+  document.getElementById('wallBarOuter').classList.remove('hidden');
+  document.getElementById('stopSessionBtn').classList.add('hidden');
+  updateWallBar();
+  if(bossTimerHandle) clearInterval(bossTimerHandle);
+  bossTimerHandle = setInterval(bossTick, 100);
+  mountNextQuestion();
+}
+function bossTick(){
+  if(!session || session.mode!=='boss') return;
+  const remain = session.endsAt - Date.now();
+  const pct = Math.max(0, Math.min(100, (remain/BOSS_TIME_MS)*100));
+  document.getElementById('progressBarInner').style.width = pct+'%';
+  if(remain<=0){
+    clearInterval(bossTimerHandle);
+    finishSession('The raiders were held back — time is up!');
+  }
+}
+function updateWallBar(){
+  const bar = document.getElementById('wallBarInner');
+  bar.style.width = Math.max(0,wallHealth)+'%';
+}
+
+function mountNextQuestion(){
+  inputBuffer = '';
+  let a,b,key;
+  if(session.mode==='diagnostic'){
+    if(session.index >= session.queue.length){ return finishSession('The Trial of Names is complete!'); }
+    key = session.queue[session.index]; session.index++;
+    const f = state.facts[key]; a=f.a; b=f.b;
+    document.getElementById('progressBarInner').style.width = (100*session.index/session.totalCount)+'%';
+  } else if(session.mode==='boss'){
+    if(session.index >= session.totalCount){ clearInterval(bossTimerHandle); return finishSession('The gate held! Raid repelled!'); }
+    key = pickWeightedFactKey(); session.index++;
+    const f = state.facts[key]; a=f.a; b=f.b;
+  } else {
+    key = pickWeightedFactKey(); session.index++;
+    const f = state.facts[key]; a=f.a; b=f.b;
+    document.getElementById('progressBarInner').style.width = '100%';
+  }
+  currentFactKey = key;
+  trackRecent(key);
+  currentDisplay = Math.random()<0.5 ? [a,b] : [b,a];
+  questionStartTs = performance.now();
+  renderQuestion();
+  renderPracticeHeader();
+}
+
+function renderQuestion(){
+  document.getElementById('questionText').textContent = currentDisplay[0]+' × '+currentDisplay[1];
+  const label = document.getElementById('questionLabel');
+  if(session.mode==='diagnostic') label.textContent = 'The Trial of Names — question '+session.index+' of '+session.totalCount;
+  else if(session.mode==='boss') label.textContent = 'Trial by Combat — hold the gate!';
+  else label.textContent = 'The Hollow — training strike';
+  renderBuffer();
+}
+function renderBuffer(){
+  const el = document.getElementById('answerBuffer');
+  if(inputBuffer.length===0){ el.textContent='—'; el.classList.add('placeholder'); }
+  else { el.textContent = inputBuffer; el.classList.remove('placeholder'); }
+}
+function renderPracticeHeader(){
+  document.getElementById('phLeft').textContent = '🌰 '+ (state.acorns) + '   🔥 '+session.sessionStreak;
+  if(session.mode==='boss'){
+    const remain = Math.max(0, session.endsAt-Date.now());
+    document.getElementById('phRight').textContent = 'Strike '+session.index+'/'+session.totalCount+'  ⏱ '+Math.ceil(remain/1000)+'s';
+  } else if(session.mode==='diagnostic'){
+    document.getElementById('phRight').textContent = session.index+' / '+session.totalCount;
+  } else {
+    document.getElementById('phRight').textContent = 'Session strikes: '+session.index;
+  }
+}
+
+function submitAnswer(){
+  if(inputBuffer.length===0) return;
+  const val = parseInt(inputBuffer,10);
+  const correctAnswer = currentDisplay[0]*currentDisplay[1];
+  const timeMs = performance.now() - questionStartTs;
+  const correct = val === correctAnswer;
+  const fact = state.facts[currentFactKey];
+  const {newlyMastered} = updateFactAfterAnswer(fact, correct, timeMs);
+
+  if(correct){
+    session.correctCount++;
+    session.sessionStreak++;
+    session.sessionStreakMax = Math.max(session.sessionStreakMax, session.sessionStreak);
+    if(timeMs < session.fastestMs) session.fastestMs = timeMs;
+    const multiplier = Math.min(1+Math.floor(session.sessionStreak/5), 5);
+    const isTrue = timeMs<=FAST_MS;
+    if(isTrue) session.trueStrikes++;
+    const base = isTrue ? 15 : 8;
+    const gained = base*multiplier;
+    session.sessionAcorns += gained;
+    state.acorns += gained;
+    state.acornsEarned += gained;
+    if(state.streakRecord < session.sessionStreakMax) state.streakRecord = session.sessionStreakMax;
+    if(isTrue){ sndTrueStrike(); toast('True Strike! +'+gained, 'great'); }
+    else { sndCorrect(); toast('Well Struck! +'+gained, 'good'); }
+    if(newlyMastered){
+      session.newlyMastered.push(currentFactKey);
+      sndMastery();
+      setTimeout(()=>toast('🗡️ Sworn Strike: '+fact.a+'×'+fact.b+' mastered!', 'mastery'), 260);
+    }
+  } else {
+    session.sessionStreak = 0;
+    sndWrong();
+    toast('Hold fast — it was '+correctAnswer, 'bad');
+    if(session.mode==='boss'){
+      wallHealth = Math.max(0, wallHealth - 12);
+      updateWallBar();
+    }
+  }
+  saveState();
+  checkRankUp();
+
+  if(session.mode==='boss' && wallHealth<=0){
+    clearInterval(bossTimerHandle);
+    return finishSession('The wall gave way — regroup and try again!');
+  }
+  mountNextQuestion();
+}
+
+let lastRankIdx = null;
+function checkRankUp(){
+  const idx = getRankIndex(masteredCount());
+  if(lastRankIdx===null) lastRankIdx = idx;
+  if(idx > lastRankIdx){
+    lastRankIdx = idx;
+    const rk = RANKS[idx];
+    document.getElementById('rankUpIcon').textContent = rk.icon;
+    document.getElementById('rankUpTitle').textContent = 'Rank Achieved: '+rk.name;
+    document.getElementById('rankUpDesc').textContent = rk.unlock;
+    document.getElementById('rankUpOverlay').classList.remove('hidden');
+    sndRankUp();
+  }
+}
+
+function finishSession(headline){
+  setMusicTrack('hub');
+  if(bossTimerHandle){ clearInterval(bossTimerHandle); bossTimerHandle=null; }
+  if(session.mode==='diagnostic') state.diagnosticDone = true;
+  state.sessionsCount++;
+  saveState();
+  renderSummary(headline);
+  showScreen('screenSummary');
+}
+
+/* ============================= SUMMARY ============================= */
+function renderSummary(headline){
+  document.getElementById('summaryTitle').textContent = 'The Day\'s Chronicle';
+  const body = document.getElementById('summaryBody');
+  const acc = session.mode==='diagnostic' ? Math.round(100*session.correctCount/session.totalCount)
+            : (session.index>0 ? Math.round(100*session.correctCount/session.index) : 0);
+  let rows = [];
+  rows.push(['Trial', headline]);
+  rows.push(['Strikes attempted', (session.mode==='diagnostic'? session.totalCount : session.index)]);
+  rows.push(['Correct', session.correctCount+' ('+acc+'%)']);
+  rows.push(['True Strikes (<2s)', session.trueStrikes]);
+  rows.push(['Acorns earned', session.sessionAcorns]);
+  rows.push(['Best streak this trial', session.sessionStreakMax]);
+  rows.push(['Fastest strike', session.fastestMs===Infinity? '—' : fmtTime(session.fastestMs)]);
+  rows.push(['Facts newly mastered', session.newlyMastered.length]);
+  body.innerHTML = rows.map(r=>'<div class="summary-stat"><span>'+r[0]+'</span><span class="val">'+r[1]+'</span></div>').join('');
+  if(session.mode==='diagnostic'){
+    const weak = allFactKeys().filter(k=>state.facts[k].status==='weak');
+    if(weak.length){
+      const list = weak.slice(0,8).map(k=>{const f=state.facts[k];return f.a+'×'+f.b;}).join(', ');
+      body.innerHTML += '<p style="margin-top:14px;"><b>The Guard has found unproven strikes to train:</b><br>'+list+(weak.length>8?'…':'')+'</p>';
+    } else {
+      body.innerHTML += '<p style="margin-top:14px;"><b>Remarkable! No glaring weaknesses found in the first trial.</b></p>';
+    }
+  }
+}
+
+/* ============================= ELDER'S RIDDLE ============================= */
+let riddle = null;
+function startRiddle(){
+  setMusicTrack('riddle');
+  showScreen('screenRiddle');
+  mountRiddle();
+}
+function mountRiddle(){
+  const A = 11 + Math.floor(Math.random()*88); // 11-98
+  const B = 12 + Math.floor(Math.random()*8);  // 12-19
+  const tensA = Math.floor(A/10)*10;
+  const onesA = A%10;
+  riddle = {
+    A,B,tensA,onesA,
+    step:0, // 0 = tensA*B, 1 = onesA*B, 2 = total
+    p1: tensA*B, p2: onesA*B, total:A*B,
+    startTs: performance.now()
+  };
+  inputBuffer='';
+  renderRiddle();
+}
+function renderRiddle(){
+  const r = riddle;
+  document.getElementById('riddleMain').innerHTML =
+    '<div style="font-size:2.2rem;font-weight:bold;color:var(--oak-dark);">'+r.A+' × '+r.B+' = ?</div>'+
+    '<div class="riddle-sub">Break '+r.A+' into '+r.tensA+' + '+r.onesA+'</div>';
+  const area = document.getElementById('riddleStepArea');
+  if(r.step===0){
+    area.innerHTML = '<div class="riddle-step">'+r.tensA+' × '+r.B+' = ?</div>';
+  } else if(r.step===1){
+    area.innerHTML = '<div class="riddle-step" style="opacity:.5">'+r.tensA+' × '+r.B+' = '+r.p1+' ✓</div>'+
+                      '<div class="riddle-step">'+r.onesA+' × '+r.B+' = ?</div>';
+  } else if(r.step===2){
+    area.innerHTML = '<div class="riddle-step" style="opacity:.5">'+r.tensA+' × '+r.B+' = '+r.p1+' ✓</div>'+
+                      '<div class="riddle-step" style="opacity:.5">'+r.onesA+' × '+r.B+' = '+r.p2+' ✓</div>'+
+                      '<div class="riddle-step">'+r.p1+' + '+r.p2+' = ?</div>';
+  }
+  renderRiddleBuffer();
+}
+function renderRiddleBuffer(){
+  const el = document.getElementById('answerBufferRiddle');
+  if(inputBuffer.length===0){ el.textContent='—'; el.classList.add('placeholder'); }
+  else { el.textContent = inputBuffer; el.classList.remove('placeholder'); }
+}
+function submitRiddleAnswer(){
+  if(inputBuffer.length===0) return;
+  const val = parseInt(inputBuffer,10);
+  const r = riddle;
+  let expected;
+  if(r.step===0) expected=r.p1; else if(r.step===1) expected=r.p2; else expected=r.total;
+  if(val===expected){
+    sndCorrect(); toast('Well struck!','good');
+    r.step++;
+    inputBuffer='';
+    if(r.step>2){
+      const timeMs = performance.now()-r.startTs;
+      sndMastery();
+      toast('Riddle solved in '+fmtTime(timeMs)+'!','mastery');
+      setTimeout(mountRiddle, 300);
+      return;
+    }
+    renderRiddle();
+  } else {
+    sndWrong(); toast('Hold fast — try again','bad');
+    inputBuffer='';
+    renderRiddleBuffer();
+  }
+}
+
+/* ============================= HUB RENDER ============================= */
+function renderHub(){
+  const c = state.character;
+  const mCount = masteredCount();
+  const rk = getRankObj(mCount);
+  const companion = equippedItem('companion');
+  const cloak = equippedItem('cloak');
+  const banner = equippedItem('banner');
+  const header = document.getElementById('hubHeader');
+  header.innerHTML =
+    '<span class="charEmoji">'+c.emoji+'</span>'+
+    (companion ? '<span class="companionEmoji" title="'+companion.name+'">'+companion.icon+'</span>' : '')+
+    '<div style="text-align:left;">'+
+      '<h2 style="margin:0;">'+escapeHtml(c.name)+' the '+c.speciesName+'</h2>'+
+      '<div class="small-note">'+c.clan+'</div>'+
+      '<div style="margin-top:4px;"><span class="rankIcon">'+rk.icon+'</span> <b>'+rk.name+'</b> · '+mCount+' / '+TOTAL_FACTS+' strikes sworn</div>'+
+    '</div>';
+  // Worn colours tint the hub panel and topbar rather than any single element.
+  header.closest('.panel').style.borderColor = cloak ? cloak.colour : '';
+  document.getElementById('topbar').style.borderBottomColor = banner ? banner.colour : '';
+
+  const unlocksRow = document.getElementById('unlocksRow');
+  unlocksRow.innerHTML = RANKS.filter(r=>mCount>=r.min).map(r=>
+    '<div class="unlock-badge" title="'+r.unlock.replace(/"/g,'&quot;')+'">'+r.icon+'</div>'
+  ).join('');
+
+  const actions = document.getElementById('hubActions');
+  actions.innerHTML='';
+  if(!state.diagnosticDone){
+    actions.innerHTML += '<button class="big-btn" id="btnDiagnostic">Begin the Trial of Names</button>';
+  } else {
+    actions.innerHTML += '<button class="big-btn" id="btnPractice">Enter the Hollow (Training)</button>';
+    actions.innerHTML += '<button class="big-btn danger" id="btnBoss">Trial by Combat (Timed)</button>';
+    actions.innerHTML += '<button class="big-btn secondary" id="btnRiddle">The Elder\'s Riddle</button>';
+    actions.innerHTML += '<button class="big-btn secondary" id="btnStore">🏪 Quartermaster\'s Stores</button>';
+    actions.innerHTML += '<button class="big-btn secondary" id="btnDiagAgain">Retake Trial of Names</button>';
+  }
+  document.getElementById('btnDiagnostic') && (document.getElementById('btnDiagnostic').onclick=()=>{sndClick();startDiagnostic();});
+  document.getElementById('btnPractice') && (document.getElementById('btnPractice').onclick=()=>{sndClick();startPractice();});
+  document.getElementById('btnBoss') && (document.getElementById('btnBoss').onclick=()=>{sndClick();startBoss();});
+  document.getElementById('btnRiddle') && (document.getElementById('btnRiddle').onclick=()=>{sndClick();startRiddle();});
+  document.getElementById('btnStore') && (document.getElementById('btnStore').onclick=()=>{sndClick();goToStore();});
+  document.getElementById('btnDiagAgain') && (document.getElementById('btnDiagAgain').onclick=()=>{sndClick();startDiagnostic();});
+
+  renderTerritoryMap(document.getElementById('hubMapWrap'), false);
+  renderTopbar();
+}
+
+function renderTerritoryMap(container, showTimes){
+  let html = '<table class="tmap"><tr><th></th>';
+  for(let b=1;b<=12;b++) html += '<th>'+b+'</th>';
+  html += '</tr>';
+  for(let a=1;a<=12;a++){
+    html += '<tr><th>'+a+'</th>';
+    for(let b=1;b<=12;b++){
+      const f = state.facts[factKey(a,b)];
+      const cls = 'cell-'+f.status;
+      const doubleCls = a===b ? ' cell-double' : '';
+      const t = f.attempts>0 ? fmtSec(f.avgTimeMs)+', '+f.correct+'/'+f.attempts+' correct' : 'not yet attempted';
+      const title = a+' × '+b+' = '+(a*b)+' — '+f.status+(showTimes?' ('+t+')':'');
+      html += '<td class="'+cls+doubleCls+'" title="'+title+'">'+(a*b)+'</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+function renderTopbar(){
+  document.getElementById('tbAcorns').textContent = state.acorns;
+  document.getElementById('tbStreak').textContent = state.streakRecord;
+  const rk = getRankObj(masteredCount());
+  document.getElementById('tbRank').textContent = rk.name;
+  document.getElementById('tbRankIcon').textContent = rk.icon;
+  document.getElementById('soundToggle').textContent = settings.soundOn ? '🔊' : '🔇';
+}
+
+/* ============================= PARENT VIEW ============================= */
+function renderParent(){
+  const mCount = masteredCount();
+  const attempted = allFactKeys().filter(k=>state.facts[k].attempts>0);
+  const avgAll = attempted.length ? Math.round(attempted.reduce((s,k)=>s+state.facts[k].avgTimeMs,0)/attempted.length) : 0;
+  const stats = document.getElementById('parentStats');
+  const rows = [
+    ['Recruit', state.character.name+' the '+state.character.speciesName],
+    ['Sessions completed', state.sessionsCount],
+    ['Facts mastered', mCount+' / '+TOTAL_FACTS],
+    ['Diagnostic completed', state.diagnosticDone?'Yes':'No'],
+    ['Best streak ever', state.streakRecord],
+    ['Acorns earned (lifetime)', (state.acornsEarned||0).toLocaleString()],
+    ['Acorns unspent (purse)', state.acorns.toLocaleString()],
+    ['Avg response time (attempted facts)', attempted.length? fmtSec(avgAll) : '—']
+  ];
+  stats.innerHTML = rows.map(r=>'<div class="summary-stat"><span>'+r[0]+'</span><span class="val">'+r[1]+'</span></div>').join('');
+
+  const weakSorted = attempted
+    .map(k=>state.facts[k])
+    .filter(f=>f.status!=='mastered')
+    .sort((a,b)=>{
+      const scoreA = (a.correct/Math.max(a.attempts,1))*-1000 + a.avgTimeMs;
+      const scoreB = (b.correct/Math.max(b.attempts,1))*-1000 + b.avgTimeMs;
+      return scoreB - scoreA;
+    })
+    .slice(0,10);
+  const weakDiv = document.getElementById('parentWeak');
+  if(weakSorted.length===0){
+    weakDiv.innerHTML = '<p class="small-note">No weak facts flagged — impressive!</p>';
+  } else {
+    weakDiv.innerHTML = '<table class="ledger-table"><tr><th>Fact</th><th>Status</th><th>Accuracy</th><th>Avg Time</th></tr>' +
+      weakSorted.map(f=>{
+        const accPct = f.attempts? Math.round(100*f.correct/f.attempts):0;
+        return '<tr><td>'+f.a+' × '+f.b+' = '+(f.a*f.b)+'</td><td><span class="weak-tag">'+f.status+'</span></td>'+
+          '<td>'+accPct+'% ('+f.correct+'/'+f.attempts+')</td><td>'+fmtSec(f.avgTimeMs)+'</td></tr>';
+      }).join('') + '</table>';
+  }
+  renderTerritoryMap(document.getElementById('parentMapWrap'), true);
+}
+
+/* ============================= TUTORIAL ============================= */
+const TUTORIAL_STEPS = [
+  {icon:'⚔️', title:'The Oakstone Guard', body:[
+    'You are a recruit of the Oakstone Guard. The Guard prizes one thing above all: a strike that lands <span class="tut-em">without hesitation</span>.',
+    'You likely know most of these facts already. This is not about learning them. It is about making the slow ones instant.'
+  ]},
+  {icon:'📜', title:'The Trial of Names', body:[
+    'Your first trial names every fact from 1×1 to 12×12, once each. It takes a couple of minutes.',
+    'It is not a test to pass. The Guard is <span class="tut-em">timing</span> you — marking which strikes you know by instinct, and which ones you are quietly working out the long way.'
+  ]},
+  {icon:'⚡', title:'True Strikes', body:[
+    'Answer in under two seconds and it counts as a <span class="tut-em">True Strike</span> — worth far more acorns 🌰 than a slow, correct answer.',
+    'Each correct answer builds your streak 🔥, and the streak multiplies what you earn. A miss costs you nothing but the streak. Hold fast and strike again.',
+    'Acorns are spent at the <span class="tut-em">Quartermaster\'s Stores</span> — on companions, cloaks and banners of your own choosing.'
+  ]},
+  {icon:'🌿', title:'The Hollow', body:[
+    'Training in the Hollow favours your <span class="tut-em">unproven strikes</span>, but keeps sworn ones in the mix so it stays real training, not drilling.',
+    'A fact becomes a <span class="tut-em">sworn strike</span> only after four fast, correct answers in a row. Answer it slowly and it must be earned again.'
+  ]},
+  {icon:'🗺️', title:'The Territory', body:[
+    'Every fact is one square of the Warren\'s territory, laid out as a 12 × 12 map.',
+    'Grey is unclaimed · <span class="tut-em">red</span> is contested · <span class="tut-em">amber</span> is skirmishing · <span class="tut-em">green</span> is claimed and sworn.',
+    'Your whole task, put simply: turn the map green.'
+  ]},
+  {icon:'🏰', title:'Trials of Pressure', body:[
+    '<span class="tut-em">Trial by Combat</span> — twenty strikes, sixty seconds, and a gate that takes damage with every miss. This is the trial that mirrors a timed test.',
+    '<span class="tut-em">The Elder\'s Riddle</span> — great sums broken apart: 46 × 16 becomes 40 × 16 and 6 × 16. This is where fast facts pay their debt.'
+  ]},
+  {icon:'👑', title:'Rise Through the Ranks', body:[
+    'Sworn strikes raise your rank: Kit → Scout → Blade-Sworn → Guard → Warden → <span class="tut-em">Legend of the Warren</span>.',
+    'Your progress saves itself, and every recruit on the muster roll keeps their own.',
+    'Now choose your post, recruit. Strike true.'
+  ]}
+];
+// Shown the first time a recruit walks into the Stores.
+const STORE_INTRO_STEPS = [
+  {icon:'🏪', title:"The Quartermaster's Stores", body:[
+    'Every strike you land earns acorns 🌰 — and the fast ones earn <span class="tut-em">far</span> more. This is where they are spent.',
+    'Goods bought here are yours for good. Nothing is ever taken back.'
+  ]},
+  {icon:'🎒', title:'Kit and Colours', body:[
+    '<span class="tut-em">Companions</span> march at your side. <span class="tut-em">Cloaks</span> and <span class="tut-em">banners</span> carry your colours onto the muster roll for all to see.',
+    'You may own many cloaks, but wear one. Change it whenever you please — it costs nothing.'
+  ]},
+  {icon:'🔒', title:'Earned, Not Sold', body:[
+    'Some goods are held back until you hold the rank for them. The Guard does not sell what must be earned.',
+    'Raise your rank by swearing strikes, and the finer kit opens to you.'
+  ]}
+];
+
+let tutorialStep = 0;
+let activeTutorialSteps = TUTORIAL_STEPS;
+let tutorialFinalLabel = 'Begin ⚔️';
+
+function openTutorial(steps, finalLabel){
+  activeTutorialSteps = steps || TUTORIAL_STEPS;
+  tutorialFinalLabel = finalLabel || 'Begin ⚔️';
+  tutorialStep = 0;
+  renderTutorialStep();
+  document.getElementById('tutorialOverlay').classList.remove('hidden');
+}
+function closeTutorial(){
+  document.getElementById('tutorialOverlay').classList.add('hidden');
+}
+function renderTutorialStep(){
+  const s = activeTutorialSteps[tutorialStep];
+  document.getElementById('tutIcon').textContent = s.icon;
+  document.getElementById('tutTitle').textContent = s.title;
+  document.getElementById('tutBody').innerHTML = s.body.map(p=>'<p>'+p+'</p>').join('');
+  document.getElementById('tutDots').innerHTML =
+    activeTutorialSteps.map((_,i)=>'<i class="'+(i===tutorialStep?'on':'')+'" data-step="'+i+'"></i>').join('');
+  document.getElementById('tutDots').querySelectorAll('i').forEach(dot=>{
+    dot.addEventListener('click', ()=>{ tutorialStep = parseInt(dot.dataset.step,10); sndClick(); renderTutorialStep(); });
+  });
+  document.getElementById('tutBackBtn').disabled = tutorialStep===0;
+  document.getElementById('tutNextBtn').textContent =
+    tutorialStep===activeTutorialSteps.length-1 ? tutorialFinalLabel : 'Next';
+}
+function tutorialNext(){
+  sndClick();
+  if(tutorialStep >= activeTutorialSteps.length-1){ closeTutorial(); return; }
+  tutorialStep++;
+  renderTutorialStep();
+}
+function tutorialBack(){
+  if(tutorialStep===0) return;
+  sndClick();
+  tutorialStep--;
+  renderTutorialStep();
+}
+
+/* ============================= QUARTERMASTER'S STORES ============================= */
+function ownsItem(id){ return state.owned.indexOf(id) !== -1; }
+function itemById(id){ return STORE_ITEMS.find(it=>it.id===id) || null; }
+function equippedItem(slot){ return state.equipped[slot] ? itemById(state.equipped[slot]) : null; }
+function itemUnlocked(item){ return getRankIndex(masteredCount()) >= item.minRank; }
+
+function goToStore(){
+  setMusicTrack('hub');
+  renderStore();
+  showScreen('screenStore');
+  if(!state.storeIntroSeen){
+    state.storeIntroSeen = true;
+    saveState();
+    openTutorial(STORE_INTRO_STEPS, 'To the Stores');
+  }
+}
+
+function renderStore(){
+  document.getElementById('storePurse').textContent = state.acorns.toLocaleString();
+  const list = document.getElementById('storeList');
+  let html = '';
+  Object.keys(SLOT_LABELS).forEach(slot=>{
+    html += '<div class="store-group-title">'+SLOT_LABELS[slot]+'</div>';
+    STORE_ITEMS.filter(it=>it.slot===slot).forEach(it=>{
+      const owned = ownsItem(it.id);
+      const unlocked = itemUnlocked(it);
+      const worn = state.equipped[slot]===it.id;
+      const cls = 'store-item'+(worn?' worn':'')+(!unlocked&&!owned?' locked':'');
+      let right = '<div class="si-price">'+it.cost.toLocaleString()+' 🌰</div>';
+      if(owned) right += '<div class="si-tag owned">Owned</div>';
+      else if(!unlocked) right += '<div class="si-tag locked">Locked</div><div class="si-req">Requires '+RANKS[it.minRank].name+'</div>';
+      html += '<div class="'+cls+'" data-id="'+it.id+'">'+
+        '<div class="si-icon">'+it.icon+'</div>'+
+        '<div class="si-text"><div class="si-name">'+it.name+'</div><div class="si-blurb">'+it.blurb+'</div></div>'+
+        '<div class="si-right">'+right+'</div>'+
+      '</div>';
+    });
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('.store-item').forEach(row=>{
+    row.addEventListener('click', ()=>handleStoreItemClick(row.dataset.id));
+  });
+}
+
+function handleStoreItemClick(id){
+  const item = itemById(id);
+  if(!item) return;
+
+  if(ownsItem(id)){ // already bought — clicking wears it
+    if(state.equipped[item.slot]===id) return;
+    state.equipped[item.slot] = id;
+    saveState();
+    sndClick();
+    toast('Now worn: '+item.name, 'good');
+    renderStore();
+    return;
+  }
+  if(!itemUnlocked(item)){
+    sndWrong();
+    toast('Held back until you are '+RANKS[item.minRank].name, 'bad');
+    return;
+  }
+  if(state.acorns < item.cost){
+    sndWrong();
+    toast('Not enough acorns — '+item.cost.toLocaleString()+' needed, '+state.acorns.toLocaleString()+' in purse', 'bad');
+    return;
+  }
+  state.acorns -= item.cost;
+  state.owned.push(id);
+  state.equipped[item.slot] = id;
+  saveState();
+  sndMastery();
+  toast('−'+item.cost.toLocaleString()+' 🌰 · '+item.name, 'mastery');
+  renderStore();
+}
+
+/* ============================= PROFILE SELECT ============================= */
+function askConfirm(title, message, okLabel, onConfirm){
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOkBtn').textContent = okLabel;
+  pendingConfirmAction = onConfirm;
+  document.getElementById('confirmOverlay').classList.remove('hidden');
+}
+let pendingConfirmAction = null;
+
+function mostRecentSlot(){
+  let best = null;
+  profiles.forEach((p,i)=>{
+    if(p && (best===null || (p.lastPlayed||0) > (profiles[best].lastPlayed||0))) best = i;
+  });
+  return best;
+}
+
+function renderProfileSelect(){
+  const grid = document.getElementById('profileGrid');
+  const recent = mostRecentSlot();
+  grid.innerHTML = profiles.map((p,i)=>{
+    if(!p || !p.character){
+      return '<div class="profile-card empty" data-slot="'+i+'" data-action="new">'+
+        '<span class="p-emoji">➕</span>'+
+        '<div class="p-name">Empty Post</div>'+
+        '<div class="p-species">Swear in a new recruit</div>'+
+      '</div>';
+    }
+    const mCount = Object.keys(p.facts).reduce((n,k)=>n+(p.facts[k].status==='mastered'?1:0),0);
+    const rk = getRankObj(mCount);
+    const eq = p.equipped||{};
+    const comp = eq.companion ? itemById(eq.companion) : null;
+    const cloak = eq.cloak ? itemById(eq.cloak) : null;
+    return '<div class="profile-card'+(i===recent?' recent':'')+'" data-slot="'+i+'" data-action="open"'+
+      (cloak?' style="border-color:'+cloak.colour+'"':'')+'>'+
+      (i===recent?'<div class="p-recent-tag">Last to march</div>':'')+
+      '<button class="p-retire" data-slot="'+i+'" title="Retire this recruit">Retire</button>'+
+      '<span class="p-emoji">'+p.character.emoji+
+        (comp?'<span class="p-companion" title="'+comp.name+'">'+comp.icon+'</span>':'')+'</span>'+
+      '<div class="p-name">'+escapeHtml(p.character.name)+'</div>'+
+      '<div class="p-species">'+p.character.clan+'</div>'+
+      '<div class="p-rank">'+rk.icon+' <b>'+rk.name+'</b></div>'+
+      '<div class="p-progress">'+mCount+' / '+TOTAL_FACTS+' strikes sworn · 🌰 '+p.acorns+'</div>'+
+    '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.profile-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const slot = parseInt(card.dataset.slot,10);
+      sndClick();
+      if(card.dataset.action==='new') startNewProfile(slot);
+      else openProfile(slot);
+    });
+  });
+  // Nobody mustered yet means a first-time visitor: draw the eye to the handbook without forcing it open.
+  const firstVisit = profiles.every(p=>!p);
+  document.getElementById('tutorialBtn').classList.toggle('highlight', firstVisit);
+
+  grid.querySelectorAll('.p-retire').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const slot = parseInt(btn.dataset.slot,10);
+      const p = profiles[slot];
+      askConfirm('Retire '+p.character.name+'?',
+        'This permanently erases every strike, rank and acorn '+p.character.name+' has earned, freeing the post for a new recruit. This cannot be undone.',
+        'Yes, Retire',
+        ()=>{ profiles[slot] = null; saveProfiles(); renderProfileSelect(); });
+    });
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Leaving a profile must not carry timers, streak history or rank state into the next one.
+function clearActiveProfile(){
+  if(bossTimerHandle){ clearInterval(bossTimerHandle); bossTimerHandle = null; }
+  session = null;
+  recentKeys = [];
+  state = null;
+  activeSlot = null;
+  document.getElementById('rankUpOverlay').classList.add('hidden');
+}
+
+function goToProfileSelect(){
+  clearActiveProfile();
+  setMusicTrack('select');
+  document.getElementById('topbar').classList.remove('hidden');
+  document.getElementById('tbStats').classList.add('hidden');
+  document.getElementById('hubBtn').classList.add('hidden');
+  document.getElementById('profileBtn').classList.add('hidden');
+  document.getElementById('soundToggle').textContent = settings.soundOn ? '🔊' : '🔇';
+  document.getElementById('ledgerLink').classList.add('hidden');
+  renderProfileSelect();
+  showScreen('screenProfileSelect');
+}
+
+function openProfile(slot){
+  clearActiveProfile();
+  activeSlot = slot;
+  state = profiles[slot];
+  state.lastPlayed = Date.now();
+  saveProfiles();
+  lastRankIdx = getRankIndex(masteredCount());
+  goToHub();
+}
+
+function startNewProfile(slot){
+  clearActiveProfile();
+  pendingNewSlot = slot;
+  selectedSpecies = null;
+  document.getElementById('nameInput').value = '';
+  document.querySelectorAll('.species-card').forEach(c=>c.classList.remove('selected'));
+  updateBeginBtn();
+  setMusicTrack('select');
+  showScreen('screenCharacterSelect');
+}
+
+/* ============================= CHARACTER SELECT LOGIC ============================= */
+let selectedSpecies = null;
+function renderSpeciesGrid(){
+  const grid = document.getElementById('speciesGrid');
+  grid.innerHTML = SPECIES.map(s=>
+    '<div class="species-card" data-id="'+s.id+'">'+
+      '<span class="emoji">'+s.emoji+'</span>'+
+      '<div class="name">'+s.name+'</div>'+
+      '<div class="clan">'+s.clan+'</div>'+
+    '</div>'
+  ).join('');
+  grid.querySelectorAll('.species-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      grid.querySelectorAll('.species-card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedSpecies = SPECIES.find(s=>s.id===card.dataset.id);
+      updateBeginBtn();
+    });
+  });
+}
+function updateBeginBtn(){
+  const name = document.getElementById('nameInput').value.trim();
+  document.getElementById('beginBtn').disabled = !(selectedSpecies && name.length>0);
+}
+
+/* ============================= INPUT HANDLING ============================= */
+function handleDigitKey(d, maxLen){
+  if(inputBuffer.length>=maxLen) return;
+  inputBuffer += d;
+}
+function handleBackspace(){ inputBuffer = inputBuffer.slice(0,-1); }
+
+document.addEventListener('keydown', (e)=>{
+  if(document.getElementById('tutorialOverlay').classList.contains('hidden')) return;
+  if(e.key==='ArrowRight' || e.key==='Enter' || e.key===' '){ tutorialNext(); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'){ tutorialBack(); e.preventDefault(); }
+  else if(e.key==='Escape'){ closeTutorial(); e.preventDefault(); }
+});
+
+document.addEventListener('keydown', (e)=>{
+  const practiceVisible = !document.getElementById('screenPractice').classList.contains('hidden');
+  const riddleVisible = !document.getElementById('screenRiddle').classList.contains('hidden');
+  if(!practiceVisible && !riddleVisible) return;
+  if(e.key>='0' && e.key<='9'){
+    handleDigitKey(e.key, practiceVisible?3:4);
+    if(practiceVisible) renderBuffer(); else renderRiddleBuffer();
+    e.preventDefault();
+  } else if(e.key==='Backspace'){
+    handleBackspace();
+    if(practiceVisible) renderBuffer(); else renderRiddleBuffer();
+    e.preventDefault();
+  } else if(e.key==='Enter'){
+    if(practiceVisible) submitAnswer(); else submitRiddleAnswer();
+    e.preventDefault();
+  } else if(e.key==='Escape'){
+    inputBuffer='';
+    if(practiceVisible) renderBuffer(); else renderRiddleBuffer();
+  }
+});
+
+function buildNumpad(){
+  const pad = document.getElementById('numpad');
+  const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','↵'];
+  pad.innerHTML = keys.map(k=>'<button data-k="'+k+'">'+k+'</button>').join('');
+  pad.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const k = btn.dataset.k;
+      if(k==='⌫') handleBackspace();
+      else if(k==='↵') { submitAnswer(); return; }
+      else handleDigitKey(k, 3);
+      renderBuffer();
+    });
+  });
+}
+
+/* ============================= WIRING ============================= */
+function init(){
+  loadSettings();
+  loadProfiles();
+  renderSpeciesGrid();
+  document.getElementById('nameInput').addEventListener('input', updateBeginBtn);
+  document.getElementById('beginBtn').addEventListener('click', ()=>{
+    if(pendingNewSlot===null || !selectedSpecies) return;
+    const name = document.getElementById('nameInput').value.trim();
+    const fresh = defaultState();
+    fresh.character = {
+      speciesId: selectedSpecies.id,
+      speciesName: selectedSpecies.name,
+      emoji: selectedSpecies.emoji,
+      clan: selectedSpecies.clan,
+      name: name
+    };
+    profiles[pendingNewSlot] = fresh;
+    activeSlot = pendingNewSlot;
+    state = fresh;
+    pendingNewSlot = null;
+    lastRankIdx = getRankIndex(masteredCount());
+    saveProfiles();
+    ensureAudioCtx();
+    goToHub();
+  });
+  document.getElementById('characterBackBtn').addEventListener('click', ()=>{
+    pendingNewSlot = null;
+    goToProfileSelect();
+  });
+
+  document.getElementById('soundToggle').addEventListener('click', ()=>{
+    settings.soundOn = !settings.soundOn;
+    ensureAudioCtx();
+    saveSettings();
+    document.getElementById('soundToggle').textContent = settings.soundOn ? '🔊' : '🔇';
+    if(settings.soundOn) sndClick();
+    setMusicTrack(desiredMusicTrack || 'select');
+  });
+
+  document.getElementById('hubBtn').addEventListener('click', goToHub);
+  document.getElementById('profileBtn').addEventListener('click', ()=>{ sndClick(); goToProfileSelect(); });
+
+  document.getElementById('tutorialBtn').addEventListener('click', ()=>{ sndClick(); openTutorial(TUTORIAL_STEPS); });
+  document.getElementById('storeBackBtn').addEventListener('click', ()=>{ sndClick(); goToHub(); });
+  document.getElementById('storeHelpBtn').addEventListener('click', ()=>{ sndClick(); openTutorial(STORE_INTRO_STEPS, 'To the Stores'); });
+  document.getElementById('tutNextBtn').addEventListener('click', tutorialNext);
+  document.getElementById('tutBackBtn').addEventListener('click', tutorialBack);
+  document.getElementById('tutSkipBtn').addEventListener('click', ()=>{ sndClick(); closeTutorial(); });
+  document.getElementById('stopSessionBtn').addEventListener('click', ()=>{
+    if(bossTimerHandle){clearInterval(bossTimerHandle);bossTimerHandle=null;}
+    finishSession('Training paused — well done for today.');
+  });
+  document.getElementById('stopRiddleBtn').addEventListener('click', goToHub);
+  document.getElementById('summaryContinueBtn').addEventListener('click', goToHub);
+  document.getElementById('rankUpDismiss').addEventListener('click', ()=>{
+    document.getElementById('rankUpOverlay').classList.add('hidden');
+  });
+
+  document.getElementById('ledgerLink').addEventListener('click', ()=>{
+    if(!state) return; // no recruit chosen yet — nothing to report on
+    stopMusicPlayback();
+    renderParent();
+    showScreen('screenParent');
+  });
+  document.getElementById('parentBackBtn').addEventListener('click', goToHub);
+  document.getElementById('parentResetBtn').addEventListener('click', ()=>{
+    const who = state && state.character ? state.character.name : 'this recruit';
+    askConfirm('Reset '+who+"'s Progress?",
+      'This permanently erases every strike, rank and acorn '+who+' has earned. The recruit is removed from the muster roll. This cannot be undone.',
+      'Yes, Erase Everything',
+      ()=>{
+        if(activeSlot!==null) profiles[activeSlot] = null;
+        saveProfiles();
+        goToProfileSelect();
+      });
+  });
+  document.getElementById('confirmCancelBtn').addEventListener('click', ()=>{
+    pendingConfirmAction = null;
+    document.getElementById('confirmOverlay').classList.add('hidden');
+  });
+  document.getElementById('confirmOkBtn').addEventListener('click', ()=>{
+    const action = pendingConfirmAction;
+    pendingConfirmAction = null;
+    document.getElementById('confirmOverlay').classList.add('hidden');
+    if(action) action();
+  });
+
+  buildNumpad();
+
+  document.addEventListener('pointerdown', unlockAudioOnce);
+  document.addEventListener('keydown', unlockAudioOnce);
+
+  goToProfileSelect();
+}
+
+function goToHub(){
+  setMusicTrack('hub');
+  document.getElementById('topbar').classList.remove('hidden');
+  document.getElementById('tbStats').classList.remove('hidden');
+  document.getElementById('hubBtn').classList.remove('hidden');
+  document.getElementById('profileBtn').classList.remove('hidden');
+  document.getElementById('ledgerLink').classList.remove('hidden');
+  renderHub();
+  showScreen('screenHub');
+}
+
+init();
+})();
+</script>
+</body>
+</html>
