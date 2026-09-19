@@ -218,6 +218,7 @@ table.tmap td{
 .toast.good{background:var(--green-claim);color:#fff;}
 .toast.great{background:var(--lantern-gold);color:var(--oak-dark);}
 .toast.bad{background:var(--red-claim);color:#fff;}
+.toast.swift{background:linear-gradient(90deg,#2f6f7a,#bfe3ea);color:var(--oak-dark);border:2px solid #1d4a52;}
 .toast.mastery{background:linear-gradient(90deg,#e8b84b,#fff3c9);color:var(--oak-dark);border:2px solid var(--oak-brown);}
 @keyframes toastPop{
   0%{opacity:0;transform:translateY(-8px) scale(.9);}
@@ -557,6 +558,7 @@ const SETTINGS_KEY = 'factWarren_settings_v1'; // device-level, shared by all pr
 const MAX_PROFILES = 4;
 const FAST_MS = 2000;
 const SLOW_MS = 3500;
+const INSTANT_MS = 800; // time to first keypress; counts double toward mastery
 const MASTERY_STREAK = 4;
 const TOTAL_FACTS = 78;
 const BOSS_TIME_MS = 60000;
@@ -790,6 +792,12 @@ function sndTrueStrike(){
   playNoiseBurst({duration:0.1, filterType:'bandpass', freqStart:3200, freqEnd:900, q:0.8, vol:0.2});
   playClang([1568,2093,2637], 0.16, 0.17, 0.055);
 }
+// swift strike: a rising flourish into a high, ringing clash — instant recall
+function sndSwiftStrike(){
+  [1046,1318,1568,2093].forEach((f,i)=>playTone(f,0.06,'square',i*0.045,0.12));
+  playNoiseBurst({duration:0.09, filterType:'bandpass', freqStart:4000, freqEnd:1200, q:0.8, vol:0.18, delay:0.16});
+  playClang([2093,2637,3136], 0.2, 0.17, 0.18);
+}
 // hold fast: a dull, cartoonish thump — not a triumphant tone, no sharp edges
 function sndWrong(){
   playNoiseBurst({duration:0.17, filterType:'lowpass', freqStart:700, freqEnd:110, q:0.6, vol:0.24});
@@ -1016,7 +1024,7 @@ function toast(msg, cls){
 }
 
 /* ============================= FACT MODEL UPDATE ============================= */
-function updateFactAfterAnswer(fact, correct, timeMs){
+function updateFactAfterAnswer(fact, correct, timeMs, recallMs){
   fact.attempts++;
   if(correct) fact.correct++;
   fact.avgTimeMs = fact.avgTimeMs===0 ? timeMs : Math.round(fact.avgTimeMs*0.7 + timeMs*0.3);
@@ -1024,7 +1032,7 @@ function updateFactAfterAnswer(fact, correct, timeMs){
   const accuracy = fact.correct/fact.attempts;
   const wasMastered = fact.status==='mastered';
   if(correct && timeMs<=FAST_MS){
-    fact.speedStreak = (fact.speedStreak||0)+1;
+    fact.speedStreak = (fact.speedStreak||0) + (recallMs<=INSTANT_MS ? 2 : 1);
   } else {
     fact.speedStreak = 0;
   }
@@ -1078,6 +1086,7 @@ let questionStartTs = 0;
 let currentFactKey = null;
 let currentDisplay = null; // [a,b] order shown
 let inputBuffer = '';
+let firstKeyTs = 0; // timestamp of first digit of the current answer
 let wallHealth = 100;
 let bossTimerHandle = null;
 
@@ -1145,6 +1154,7 @@ function updateWallBar(){
 
 function mountNextQuestion(){
   inputBuffer = '';
+  firstKeyTs = 0;
   let a,b,key;
   if(session.mode==='diagnostic'){
     if(session.index >= session.queue.length){ return finishSession('The Trial of Names is complete!'); }
@@ -1198,9 +1208,10 @@ function submitAnswer(){
   const val = parseInt(inputBuffer,10);
   const correctAnswer = currentDisplay[0]*currentDisplay[1];
   const timeMs = performance.now() - questionStartTs;
+  const recallMs = firstKeyTs ? firstKeyTs - questionStartTs : timeMs;
   const correct = val === correctAnswer;
   const fact = state.facts[currentFactKey];
-  const {newlyMastered} = updateFactAfterAnswer(fact, correct, timeMs);
+  const {newlyMastered} = updateFactAfterAnswer(fact, correct, timeMs, recallMs);
 
   if(correct){
     session.correctCount++;
@@ -1216,7 +1227,8 @@ function submitAnswer(){
     state.acorns += gained;
     state.acornsEarned += gained;
     if(state.streakRecord < session.sessionStreakMax) state.streakRecord = session.sessionStreakMax;
-    if(isTrue){ sndTrueStrike(); toast('True Strike! +'+gained, 'great'); }
+    if(isTrue && recallMs<=INSTANT_MS){ sndSwiftStrike(); toast('Swift Strike! +'+gained, 'swift'); }
+    else if(isTrue){ sndTrueStrike(); toast('True Strike! +'+gained, 'great'); }
     else { sndCorrect(); toast('Well Struck! +'+gained, 'good'); }
     if(newlyMastered){
       session.newlyMastered.push(currentFactKey);
@@ -1493,6 +1505,7 @@ const TUTORIAL_STEPS = [
   ]},
   {icon:'⚡', title:'True Strikes', body:[
     'Answer in under two seconds and it counts as a <span class="tut-em">True Strike</span> — worth far more acorns 🌰 than a slow, correct answer.',
+    'Answer with no hesitation at all and it counts <span class="tut-em">double</span> toward swearing a strike.',
     'Each correct answer builds your streak 🔥, and the streak multiplies what you earn. A miss costs you nothing but the streak. Hold fast and strike again.',
     'Acorns are spent at the <span class="tut-em">Quartermaster\'s Stores</span> — on companions, cloaks and banners of your own choosing.'
   ]},
@@ -1796,6 +1809,7 @@ function updateBeginBtn(){
 /* ============================= INPUT HANDLING ============================= */
 function handleDigitKey(d, maxLen){
   if(inputBuffer.length>=maxLen) return;
+  if(inputBuffer.length===0) firstKeyTs = performance.now();
   inputBuffer += d;
 }
 function handleBackspace(){ inputBuffer = inputBuffer.slice(0,-1); }
