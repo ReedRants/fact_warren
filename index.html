@@ -198,13 +198,13 @@ table.tmap td{
   display:flex;align-items:center;justify-content:center;margin-bottom:14px;
 }
 #answerBuffer.placeholder{color:#bbb;}
-#numpad{display:grid;grid-template-columns:repeat(3,64px);gap:8px;justify-content:center;margin:6px auto 0;}
-#numpad button{
+#numpad,#riddleNumpad{display:grid;grid-template-columns:repeat(3,64px);gap:8px;justify-content:center;margin:6px auto 0;}
+#numpad button,#riddleNumpad button{
   font-size:1.3rem;padding:12px 0;border-radius:8px;border:2px solid var(--oak-brown);
   background:var(--white);cursor:pointer;font-family:inherit;font-weight:bold;color:var(--ink);
 }
-#numpad button:hover{background:var(--parchment-dark);}
-#numpad button.wide{grid-column:span 1;}
+#numpad button:hover,#riddleNumpad button:hover{background:var(--parchment-dark);}
+#numpad button.wide,#riddleNumpad button.wide{grid-column:span 1;}
 .hint-line{font-size:.8rem;color:var(--ink-soft);margin-top:12px;}
 #stopSessionBtn{margin-top:18px;}
 
@@ -452,6 +452,7 @@ table.ledger-table th{background:var(--parchment-dark);}
       <div class="center" id="riddleMain"></div>
       <div id="riddleStepArea"></div>
       <div id="answerBufferRiddle" class="placeholder" style="font-size:2rem;min-height:52px;background:var(--white);border:3px solid var(--oak-brown);border-radius:10px;padding:8px 16px;letter-spacing:3px;display:flex;align-items:center;justify-content:center;margin:14px auto;max-width:220px;">—</div>
+      <div id="riddleNumpad"></div>
       <div class="hint-line center">Type your answer, press <b>Enter</b>.</div>
     </div>
     <button class="big-btn secondary" id="stopRiddleBtn">Return to the Warren</button>
@@ -1843,19 +1844,23 @@ document.addEventListener('keydown', (e)=>{
   }
 });
 
-function buildNumpad(){
-  const pad = document.getElementById('numpad');
+function buildPad(padId, maxLen, renderFn, submitFn){
+  const pad = document.getElementById(padId);
   const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','↵'];
   pad.innerHTML = keys.map(k=>'<button data-k="'+k+'">'+k+'</button>').join('');
   pad.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const k = btn.dataset.k;
       if(k==='⌫') handleBackspace();
-      else if(k==='↵') { submitAnswer(); return; }
-      else handleDigitKey(k, 3);
-      renderBuffer();
+      else if(k==='↵') { submitFn(); return; }
+      else handleDigitKey(k, maxLen);
+      renderFn();
     });
   });
+}
+function buildNumpad(){
+  buildPad('numpad', 3, renderBuffer, submitAnswer);
+  buildPad('riddleNumpad', 4, renderRiddleBuffer, submitRiddleAnswer);
 }
 
 /* ============================= WIRING ============================= */
