@@ -1015,12 +1015,13 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
-function toast(msg, cls){
+function toast(msg, cls, ms){
   const t = document.createElement('div');
   t.className = 'toast '+(cls||'good');
   t.textContent = msg;
+  if(ms) t.style.animationDuration = ms+'ms';
   document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(), 850);
+  setTimeout(()=>t.remove(), (ms||800)+50);
 }
 
 /* ============================= FACT MODEL UPDATE ============================= */
@@ -1238,7 +1239,7 @@ function submitAnswer(){
   } else {
     session.sessionStreak = 0;
     sndWrong();
-    toast('Hold fast — it was '+correctAnswer, 'bad');
+    toast('Hold fast — it was '+correctAnswer, 'bad', 2800);
     if(session.mode==='boss'){
       wallHealth = Math.max(0, wallHealth - 12);
       updateWallBar();
